@@ -111,4 +111,4 @@ IRC.join = function(irc, chan, callback) {
 	irc.raw('JOIN ' + chan);
 };
 
-if(module) { module.exports = IRC; }
+module.exports = IRC;

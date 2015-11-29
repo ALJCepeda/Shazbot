@@ -9,6 +9,7 @@ var Bot = function() {
 	this.password;
 	this.irc;
 
+	this.channels = [];
 	this.commands = commands;
 };
 
@@ -28,7 +29,7 @@ Bot.prototype.join = function(channel) {
 	return Bot.join(this, channel);
 };
 
-Bot.prototype.parse = function(str) {
+Bot.prototype.parse = function(str) { 
 	return Bot.parse(this, str);
 };
 
@@ -65,10 +66,17 @@ Bot.prototype.PRIVMSG = function(entity, args) {
 };
 
 Bot.split = function(bot, str) {
+	var isValid = false;
+	var prefix;
+
 	var args = str.split(" ");
 	var target = args.shift();
 	var cmd = args.shift();
-	var isValid = false;
+
+	if(cmd.indexOf("@") === 0) {
+		prefix = cmd.slice(1, cmd.length);
+		cmd = args.shift();
+	}
 
 	if(!_.isUndefined(target) && !_.isUndefined(cmd) && !_.isUndefined(args)) {
 		isValid = true;
@@ -76,6 +84,7 @@ Bot.split = function(bot, str) {
 
 	return {
 		target:target,
+		prefix:prefix,
 		cmd:cmd,
 		args:args,
 		valid:isValid
@@ -109,10 +118,11 @@ Bot.canRespond = function(bot, info) {
 Bot.parse = function(bot, str) {
 	var info = bot.split(str);
 	var result = "";
-	
+
 	if(info.valid === true && bot.canRespond(info) === true) {
 		var response = bot.commandFor(info.cmd);
-		result = response.action(info.args);
+		var prefix = !_.isUndefined(info.prefix) ? info.prefix + " " : "";
+		result = response.action(info.args, prefix);
 	}
 
 	return result;
@@ -125,8 +135,21 @@ Bot.connect = function(bot, nick, password, server, port) {
 	irc.connect(server, port, function() {
 		bot.user("Literphor", "NodeJS Bot");
 		bot.nick(nick, password);
-		bot.join("botzoo");
+		
+		irc.on("NOTICE", function(entity, args) {
+			var profile = new Profile(entity);
 
+			if(profile.nick === "NickServ") {
+				console.log(args);
+				if(args[1].indexOf("identified") >= 0) {
+					console.log("Identified");
+					bot.channels.forEach(function(channel) {
+						console.log("Joining channel: #" + channel);
+						bot.join(channel);
+					});
+				}
+			}
+		});
 		irc.on("PING", function(entity, args) {
 			bot.PING(entity, args);
 		});
