@@ -1,5 +1,6 @@
 require("../prototypes/string");
 var _ = require("underscore");
+var Promise = require("promise");
 var IRC = require("./irc");
 var Profile = require("./profile");
 var commands = require("./commands");
@@ -8,6 +9,7 @@ var Bot = function() {
 	this.nick;
 	this.password;
 	this.irc;
+	this.isRegistered = false;
 
 	this.channels = [];
 	this.commands = commands;
@@ -27,6 +29,10 @@ Bot.prototype.nick = function(nick, password) {
 
 Bot.prototype.join = function(channel) {
 	return Bot.join(this, channel);
+};
+
+Bot.prototype.joinChannels = function() {
+	return Bot.joinChannels(this);
 };
 
 Bot.prototype.parse = function(str) { 
@@ -117,15 +123,19 @@ Bot.canRespond = function(bot, info) {
 
 Bot.parse = function(bot, str) {
 	var info = bot.split(str);
-	var result = "";
+	var promise;
 
-	if(info.valid === true && bot.canRespond(info) === true) {
-		var response = bot.commandFor(info.cmd);
-		var prefix = !_.isUndefined(info.prefix) ? info.prefix + " " : "";
-		result = response.action(info.args, prefix);
+	if(info.valid === true && bot.isTargeted(info.target) === true) {
+		if(bot.hasCommand(info.cmd) === true) {
+			var response = bot.commandFor(info.cmd);
+			var prefix = !_.isUndefined(info.prefix) ? info.prefix + " " : "";
+			promise = response.action(info.args, prefix);
+		} else {
+			promise = Promise.resolve("Unrecognized command: " + info.cmd);
+		}
 	}
 
-	return result;
+	return promise;
 };
 
 Bot.connect = function(bot, nick, password, server, port) {
@@ -136,29 +146,25 @@ Bot.connect = function(bot, nick, password, server, port) {
 		bot.user("Literphor", "NodeJS Bot");
 		bot.nick(nick, password);
 		
-		irc.on("NOTICE", function(entity, args) {
-			var profile = new Profile(entity);
-
-			if(profile.nick === "NickServ") {
-				console.log(args);
-				if(args[1].indexOf("identified") >= 0) {
-					console.log("Identified");
-					bot.channels.forEach(function(channel) {
-						console.log("Joining channel: #" + channel);
-						bot.join(channel);
-					});
-				}
-			}
-		});
 		irc.on("PING", function(entity, args) {
 			bot.PING(entity, args);
 		});
 
-		irc.on("PRIVMSG", function(entity,args) {
+		irc.on("PRIVMSG", function(entity, args) {
 			bot.PRIVMSG(entity, args);
+		});
+
+		irc.on_once("MODE", function(entity, args) {
+			bot.joinChannels();
 		});
 	});
 };
+
+Bot.joinChannels = function(bot) {
+	bot.channels.forEach(function(channel) {
+		bot.join(channel);
+	});
+}
 
 Bot.PING = function(bot, entity, args) {
 	bot.irc.raw('PONG :{0}'.supplant([args[1]]));
@@ -167,10 +173,21 @@ Bot.PING = function(bot, entity, args) {
 Bot.PRIVMSG = function(bot, entity, args) {
 	var profile = new Profile(entity);
 	if(profile.isAdmin()) {
-		var result = bot.parse(args[1]);
+		var promise = bot.parse(args[1]);
 
-		if(result !== "") {
-			bot.say(args[0], result);
+		if(!_.isUndefined(promise)) {
+			promise.then(function(result) {
+				if(_.isArray(result)) {
+					result.forEach(function(line) {
+						bot.say(args[0], line);
+					})
+				} else {
+					bot.say(args[0], result);
+				}
+			}).catch(function(error) {
+				console.log(error);
+				bot.say(args[0], "Internal error encountered");
+			});
 		}
 	}
 };
@@ -187,7 +204,10 @@ Bot.nick = function(bot, nick, password) {
 	bot.nick = nick;
 	bot.password = password;
 	bot.irc.raw("NICK " + nick);
-	bot.irc.raw("PRIVMSG NickServ :IDENTIFY " +password, true);
+
+	if(this.isRegistered === true) {
+		bot.irc.raw("PRIVMSG NickServ :IDENTIFY " +password, true);
+	}
 };
 
 Bot.join = function(bot, channel) {

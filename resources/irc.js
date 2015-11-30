@@ -5,7 +5,7 @@ var IRC = function() {
 	var self = this;
 	this.socket = new net.Socket();
 	this.listeners = {};
-	this.encoding = "ascii";
+	this.encoding = "utf-8";
 	this.noDelay = true;
 
 	this.socket.on('data', function (data) {
@@ -48,7 +48,7 @@ IRC.prototype.join = function(channel) {
 };
 
 IRC.connect = function(irc, host, port, cb) {
-	irc.socket.setEncoding(this.encoding);
+	irc.socket.setEncoding("utf8");
 
 	if(this.noDelay === true) {
 		irc.socket.setNoDelay();
