@@ -172,21 +172,24 @@ Bot.PING = function(bot, entity, args) {
 
 Bot.PRIVMSG = function(bot, entity, args) {
 	var profile = new Profile(entity);
+
 	if(profile.isAdmin()) {
 		var promise = bot.parse(args[1]);
 
 		if(!_.isUndefined(promise)) {
+			var recipient = args[0] === bot.nick ? profile.nick : args[0];
+			
 			promise.then(function(result) {
 				if(_.isArray(result)) {
 					result.forEach(function(line) {
-						bot.say(args[0], line);
+						bot.say(recipient, line);
 					})
 				} else {
-					bot.say(args[0], result);
+					bot.say(recipient, result);
 				}
 			}).catch(function(error) {
 				console.log(error);
-				bot.say(args[0], "Internal error encountered");
+				bot.say(recipient, "Internal error encountered");
 			});
 		}
 	}
