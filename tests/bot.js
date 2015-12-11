@@ -5,7 +5,7 @@ var Bot = require("../resources/bot");
 
 describe("Profile", function() {
 	describe("IRC Commands", function() {
-		xit("echo", function(done) {
+		it("echo", function(done) {
 			var bot = new Bot();
 
 			bot.parse("shaz echo Hello World").then(function(result) {
@@ -14,7 +14,7 @@ describe("Profile", function() {
 			});
 		});
 
-		xit("echo with prefix", function() {
+		it("echo with prefix", function() {
 			var bot = new Bot();
 			
 			bot.parse("shaz @Literphor echo Hello World!").then(function(result) {
@@ -23,7 +23,7 @@ describe("Profile", function() {
 			});
 		});
 
-		xit("lgt", function(done) {
+		it("lgt", function(done) {
 			var bot = new Bot();
 
 			bot.parse("shaz lgt Is pluto a planet?").then(function(result) {
@@ -32,7 +32,7 @@ describe("Profile", function() {
 			});
 		});
 
-		xit("lgt with prefix", function(done) {
+		it("lgt with prefix", function(done) {
 			var bot = new Bot();
 			
 			bot.parse("shaz @Literphor lgt Is pluto a planet?").then(function(result) {
@@ -41,7 +41,7 @@ describe("Profile", function() {
 			});
 		});
 
-		xit("php", function(done) {
+		it("php", function(done) {
 			var bot = new Bot();
 
 			bot.parse("shaz php $foo = 'bar'; echo $foo;").then(function(result) {
@@ -50,7 +50,7 @@ describe("Profile", function() {
 			}).catch(done);
 		});
 
-		xit("php error", function(done) {
+		it("php error", function(done) {
 			var bot = new Bot();
 
 			bot.parse("shaz php echo $foo;").then(function(result) {
@@ -59,13 +59,21 @@ describe("Profile", function() {
 			}).catch(done);
 		});
 
-		it("nodejs", function(done) {
+		it("nodejs curly quotes", function(done) {
 			var bot = new Bot();
 
 			bot.parse("shaz nodejs var foo = “bar”; console.log(foo);").then(function(result) {
-				console.log(result);
+				result.should.equal("bar");
 				done();
 			}).catch(done);
+		});
+
+		it("nodejs error", function(done) {
+			var bot = new Bot();
+
+			bot.parse('shaz nodejs var foo = bar"; consol.log("Hello"); console.log(foo);').then(function(result) {
+				console.log(result);
+			});
 		});
 	});
 });

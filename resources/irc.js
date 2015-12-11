@@ -11,7 +11,6 @@ var IRC = function() {
 	this.socket.on('data', function (data) {
 		data = data.split('\n');
 		for (var i = 0; i < data.length; i++) {
-			console.log('RECV -', data[i]);
 			if (data[i] !== '') {
 				self.handle(data[i].slice(0, -1));
 			}
@@ -35,8 +34,8 @@ IRC.prototype.on_once = function(cmd, cb) {
 	return IRC.on_once(this, cmd, cb);
 };
 
-IRC.prototype.raw = function(data) {
-	return IRC.raw(this, data);
+IRC.prototype.raw = function(data, squelch) {
+	return IRC.raw(this, data, squelch);
 };
 
 IRC.prototype.handle = function(data) {
@@ -45,6 +44,10 @@ IRC.prototype.handle = function(data) {
 
 IRC.prototype.join = function(channel) {
 	return IRC.join(this, channel);
+};
+
+IRC.prototype.data = function(data) {
+	return IRC.data(this, data);
 };
 
 IRC.connect = function(irc, host, port, cb) {
@@ -89,9 +92,8 @@ IRC.raw = function(irc, data, squelch) {
 
 IRC.handle = function(irc, data) {
 	var i, info;
-	var parser = /^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$/;
 
-	info = parser.exec(data);
+	info = /^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$/.exec(data);
 	if (info) {
 		var entity = info[1];
 		var cmd = info[2];
@@ -103,6 +105,8 @@ IRC.handle = function(irc, data) {
 				entry[0](entity, args);
 				return entry[1] === false;
 			});
+		} else {
+			irc.data(data);
 		}
 	}
 };

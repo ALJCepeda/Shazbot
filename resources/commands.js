@@ -5,20 +5,28 @@ function uncurlQuotes(str) {
 	var result = str.replace(/“|”/g, '"').replace(/‘|’/g, "'");
 	return result;
 }
-var commands = {
 
+var commands = {
 	echo: {
 		action: function(args, prefix) {
 			var message = args.join(" ");
 			var result = prefix + message;
 
+			if(prefix !== "") {
+				result = prefix + " " + result;
+			}
+
 			return Promise.resolve(result);
-		}
+		}, alias: ["say"]
 	},
 	lgt: {
 		action:function(args, prefix) {
 			var query = args.join("+");
 			var result = "{0}Lets google that! http://lmgtfy.com/?q={1}".supplant([prefix, query]);
+
+			if(prefix !== "") {
+				result = prefix + " " + result;
+			}
 
 			return Promise.resolve(result);
 		}
@@ -35,11 +43,16 @@ var commands = {
 			return docker.execute(code, "php", "latest").then(function(data) {
 				var result = data.stderr !== "" ? data.stderr : data.stdout;
 
-				result = result .replace("PHP ", "")
-								.replace(/in\s.*/, "")
-								.replace("\n","")
-								.replace(/(\s+)$/, "");
+				if(data.stderr !== "") {
+					result = /^PHP (.*) in .*\n/g.exec(result);
+					result.shift();
+					result = result.join("\n");
 
+					if(prefix !== "") {
+						result = prefix + " " + result;
+					}
+				}
+				
 				return Promise.resolve(result);
 			});
 		}
@@ -47,7 +60,6 @@ var commands = {
 	nodejs: {
 		action:function(args, prefix) {
 			var docker = new Dockerizer('/var/tmp/shazbot');
-			
 			var code = args.join(" ");
 			code = uncurlQuotes(code);
 
@@ -55,11 +67,19 @@ var commands = {
 			return docker.execute(code, "nodejs", "latest").then(function(data) {
 				if(data.stderr !== "") {
 					var error = data.stderr;
-					var typical = "ction (exports, require, module, __filename, __dirname) { ";
 
-					var parts = error.split("\n").slice(1, 4);
-					parts[0] = parts[0].replace(typical, "");
-					parts[1] = parts[1].slice(typical.length, parts[1].length);
+					var parts = error.split("\n").slice(1, 4)
+					var before = parts[0].length;
+					parts[0] = parts[0].replace(/.*{\s/, ""); //Error line with weird func call
+
+					var diff = before - parts[0].length;
+					parts[1] = parts[1].slice(diff, parts[1].length);
+
+					if(prefix !== "") {
+						parts = parts.map(function(part) {
+							return prefix + " " + part;
+						});
+					}
 
 					return Promise.resolve(parts);
 				}
