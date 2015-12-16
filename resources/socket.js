@@ -1,24 +1,56 @@
-var io = require('socket.io')(http);
 var Bot = require("./bot");
+var IRC = require("./irc");
+var Profile = require("./profile");
 
-var bootstrap_socket = function() {
+var bootstrap_socket = function(io) {
 	io.on('connection', function(socket) {
-		var bot = new Bot();
-		bot.channels = ["botzoo"];
+		console.log("User connected..");
+
+		var irc = new IRC();
+		irc.data = function(data) {
+			io.emit("data", data);
+		};
+
+		var bot = new Bot(irc);
+		bot.channels = ["botwar"];
 		bot.isRegistered = true;
 
-		socket.on('msg', function(msg) {
-
+		bot.on("joined", function(entity, args) {
+			var info = args[0].split(" ");
+			socket.emit("joined", { room:info[1], entity:entity, args:args });
 		});
 
-		try {
-			bot.connect("Shazbot", "gooman10", "chat.freenode.net", 6667);
-			bot.irc.data(function(data) {
-				socket.emit('data', data);
-			});
-		} catch(exception) {
+		bot.on("privmsg", function(entity, args) {
+			var profile = new Profile(entity);
+			socket.emit("privmsg", { room:args[0], from:profile.nick, msg:args[1] });
+		});
 
-		}
+		bot.on("nicknames", function(entity, args) {
+			var ent = entity.split(" = ");
+			var user = ent[0];
+			var room = ent[1];
+			var nicks = args[1].split(" ");
+
+			socket.emit("nicknames", { room:ent[1], nicknames:nicks });
+		});
+
+		socket.on('msg', function(msg) {
+			if(msg[0] === "/") {
+				msg = msg.slice(1, msg.length);
+
+				if(msg !== "connect") {
+					irc.raw(msg);
+				} else {
+					try {
+						bot.connect("Shazbot", "gooman10", "chat.freenode.net", 6667);	
+					} catch(exception) {
+						throw exception;
+					}
+				}
+			} else {
+				bot.say(msg);
+			}
+		});
 	});
 
 

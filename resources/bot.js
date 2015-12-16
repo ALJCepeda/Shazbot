@@ -1,88 +1,40 @@
 require("../prototypes/string");
 var _ = require("underscore");
 var Promise = require("promise");
-var IRC = require("./irc");
 var Profile = require("./profile");
 var commands = require("./commands");
 
-var Bot = function() {
+var Bot = function(irc) {
 	this.nick = "";
 	this.user = "Literphor";
 	this.info = "NodeJS Bot";
 	this.password = "";
-	this.irc = "";
 	this.isRegistered = false;
 	this.anonymousUse = false;
 
 	this.channels = [];
 	this.commands = commands;
+	this.listeners = {};
+	this.irc = irc;
 };
 
-Bot.prototype.connect = function(nick, password, server, port) {
-	return Bot.connect(this, nick, password, server, port);
+Bot.prototype.listen = function(cmd, cb, once) {
+	if( _.isUndefined(this.listeners[cmd]) ) {
+		this.listeners[cmd] = [];
+	}
+
+	this.listeners[cmd].push([cb, once]);
 };
 
-Bot.prototype.changeUser = function(user, info) {
-	return Bot.changeUser(this, user, info);
+Bot.prototype.on = function(cmd, cb) {
+	this.listen(cmd, cb, false);
 };
 
-Bot.prototype.changeNick = function(nick, password) {
-	return Bot.changeNick(this, nick, password);
-};
-
-Bot.prototype.join = function(channel) {
-	return Bot.join(this, channel);
-};
-
-Bot.prototype.joinChannels = function() {
-	return Bot.joinChannels(this);
-};
-
-Bot.prototype.parse = function(str) { 
-	return Bot.parse(this, str);
-};
-
-Bot.prototype.outputTo = function(recipient) {
-	return Bot.outputTo(this, recipient);
+Bot.prototype.once = function(cmd, cb) {
+	this.listen(cmd, cb, true);
 };
 
 Bot.prototype.split = function(str) {
-	return Bot.split(this, str);
-};
-
-Bot.prototype.isTargeted = function(target) {
-	return Bot.isTargeted(this, target);
-};
-
-Bot.prototype.hasCommand = function(cmd) {
-	return Bot.hasCommand(this, cmd);
-};
-
-Bot.prototype.commandFor = function(cmd) {
-	return Bot.commandFor(this, cmd);
-};
-
-Bot.prototype.canRespond = function(info) {
-	return Bot.canRespond(this, info);
-};
-
-Bot.prototype.identify = function(password) {
-	return Bot.identify(this, password);
-};
-
-Bot.prototype.say = function(target, message) {
-	return Bot.say(this, target, message);
-};
-
-Bot.prototype.PING = function(entity, args) {
-	return Bot.PING(this, entity, args);
-};
-
-Bot.prototype.PRIVMSG = function(entity, args) {
-	return Bot.PRIVMSG(this, entity, args);
-};
-
-Bot.split = function(bot, str) {
 	var isValid = false;
 
 	var args = str.split(" ");
@@ -111,7 +63,7 @@ Bot.split = function(bot, str) {
 	};
 };
 
-Bot.isTargeted = function(bot, target) {
+Bot.prototype.isTargeted = function(target) {
 	if(target === "shaz") {
 		return true;
 	}
@@ -119,34 +71,34 @@ Bot.isTargeted = function(bot, target) {
 	return false;
 };
 
-Bot.hasCommand = function(bot, cmd) {
-	return !_.isUndefined(bot.commands[cmd]);
+Bot.prototype.hasCommand = function(cmd) {
+	return !_.isUndefined(this.commands[cmd]);
 };
 
-Bot.commandFor = function(bot, cmd) {
-	return bot.commands[cmd];
+Bot.prototype.commandFor = function(cmd) {
+	return this.commands[cmd];
 };
 
-Bot.canRespond = function(bot, info) {
-	if(bot.isTargeted(info.target) && bot.hasCommand(info.cmd)) {
+Bot.prototype.canRespond = function(info) {
+	if(this.isTargeted(info.target) && this.hasCommand(info.cmd)) {
 		return true;
 	}
 
 	return false;
 };
 
-Bot.parse = function(bot, str) {
-	var info = bot.split(str);
+Bot.prototype.parse = function(str) {
+	var info = this.split(str);
 	var promise = Promise.resolve("");
 
-	if(info.valid === true) {
-		if(bot.hasCommand(info.cmd) === true) {
+	/*if(info.valid === true) {
+		if(this.hasCommand(info.cmd) === true) {
 			var response = 
 		}
-	}
+	}*/
 
-	if(info.valid === true && (isLocal === true || bot.isTargeted(info.target) === true)) {
-		if(bot.hasCommand(info.cmd) === true) {
+	if(info.valid === true && (isLocal === true || this.isTargeted(info.target) === true)) {
+		if(this.hasCommand(info.cmd) === true) {
 			var response = bot.commandFor(info.cmd);
 			promise = response.action(info.args, info.prefix);
 		} else {
@@ -157,34 +109,54 @@ Bot.parse = function(bot, str) {
 	return promise;
 };
 
-Bot.connect = function(bot, nick, password, server, port) {
-	irc = new IRC();
-	bot.irc = irc;
-	
+Bot.prototype.emit = function(cmd, entity, data) {
+	var listeners = this.listeners[cmd];
+
+	if(!_.isUndefined(listeners)) {
+		this.listeners[cmd] = listeners.filter(function(entry) {
+			entry[0](entity, data);
+			return entry[1] === false;
+		});
+	}
+};
+
+Bot.prototype.connect = function(nick, password, server, port) {
+	var self = this;
+	var irc = self.irc;
+	console.log("Connecting to irc...");
+
 	irc.connect(server, port, function() {
-		bot.changeUser(bot.user, bot.info);
-		bot.changeNick(nick);
+		self.changeUser(this.user, this.info);
+		self.changeNick(nick);
 
 		irc.on("PING", function(entity, args) {
-			bot.PING(entity, args);
+			self.PING(entity, args);
 		});
 
 		irc.on("PRIVMSG", function(entity, args) {
-			bot.PRIVMSG(entity, args);
-			return true;
+			self.emit("privmsg", entity, args);
 		});
 
-		if(bot.isRegistered === true) {
+		//353 is list of names in room
+		irc.on("353", function(entity, args) {
+			self.emit("nicknames", entity, args);
+		});
+		//366 is good for joining rooms
+		irc.on("366", function(entity, args) {
+			self.emit("didJoin", entity, args);
+		});
+
+		if(self.isRegistered === true) {
 			irc.on("NOTICE", function(entity, args) {
 				var profile = new Profile(entity);
 
 				if(profile.nick === "NickServ") {
 					if(args[1].indexOf("registered") >= 0) {
-						bot.identify(password);
+						self.identify(password);
 					}
 
 					if(args[1].indexOf("identified") >= 0) {
-						bot.joinChannels();
+						self.joinChannels();
 					}
 				}
 
@@ -192,77 +164,73 @@ Bot.connect = function(bot, nick, password, server, port) {
 			});
 		} else {
 			irc.on_once("MODE", function(entity, args) {
-				bot.joinChannels();
+				self.joinChannels();
 				return true;
 			});
 		}
 	});
 };
 
-Bot.joinChannels = function(bot) {
-	bot.channels.forEach(function(channel) {
-		bot.join(channel);
-	});
-}
-
-Bot.PING = function(bot, entity, args) {
-	bot.irc.raw('PONG :{0}'.supplant([args[1]]));
+Bot.prototype.joinChannels = function() {
+	this.channels.forEach(function(channel) {
+		this.join(channel);
+	}.bind(this));
 };
 
-Bot.exec = function(bot, str) {
+Bot.prototype.PING = function(entity, args) {
+	this.irc.raw('PONG :{0}'.supplant([args[1]]));
+};
 
-}
-
-Bot.outputTo = function(recipient) {
+Bot.prototype.outputTo = function(recipient) {
 	return function(msg) {
 		if(_.isArray(msg)) {
 			msg.forEach(function(line) {
-				bot.say(recipient, line);
+				this.say(recipient, line);
 			})
 		} else if(msg !== ""){
-			bot.say(recipient, msg);
+			this.say(recipient, msg);
 		}
 	};
 };
 
-Bot.error = function(error) {
+Bot.prototype.error = function(error) {
 	console.log(error);
-	bot.say(recipient, "Internal error encountered");
+	this.say(recipient, "Internal error encountered");
 };
-Bot.PRIVMSG = function(bot, entity, args) {
+Bot.prototype.PRIVMSG = function(entity, args) {
 	var profile = new Profile(entity);
 
-	if(bot.anonymousUse === true || profile.isAdmin() === true) {
-		var promise = bot.parse(args[1]) || "";
+	if(this.anonymousUse === true || profile.isAdmin() === true) {
+		var promise = this.parse(args[1]) || "";
 
-		var recipient = args[0] === bot.nick ? profile.nick : args[0];
+		var recipient = args[0] === this.nick ? profile.nick : args[0];
 
-		promise.then(bot.outputTo(recipient)).catch(bot.error);
+		promise.then(this.outputTo(recipient)).catch(this.error);
 	}
 };
 
-Bot.say = function(bot, target, message) {
-	bot.irc.raw("PRIVMSG {0} :{1}".supplant([target, message]));
+Bot.prototype.say = function(target, message) {
+	this.irc.raw("PRIVMSG {0} :{1}".supplant([target, message]));
 };
 
-Bot.changeUser = function(bot, user, info) {
-	bot.user = user;
-	bot.info = info;
-	bot.irc.raw("USER {0} 8 * :{1}".supplant([user, info]));
+Bot.prototype.changeUser = function(user, info) {
+	this.user = user;
+	this.info = info;
+	this.irc.raw("USER {0} 8 * :{1}".supplant([user, info]));
 };
 
-Bot.changeNick = function(bot, nick) {
-	bot.nick = nick;
-	bot.irc.raw("NICK " + nick);
+Bot.prototype.changeNick = function(nick) {
+	this.nick = nick;
+	this.irc.raw("NICK " + nick);
 };
 
-Bot.identify = function(bot, password) {
-	bot.password = password;
-	bot.irc.raw("PRIVMSG NickServ :IDENTIFY " +password, true);
+Bot.prototype.identify = function(password) {
+	this.password = password;
+	this.irc.raw("PRIVMSG NickServ :IDENTIFY " +password, true);
 };
 
-Bot.join = function(bot, channel) {
-	bot.irc.raw("JOIN #{0}".supplant([channel]));
+Bot.prototype.join = function(channel) {
+	this.irc.raw("JOIN #{0}".supplant([channel]));
 };
 
 module.exports = Bot;

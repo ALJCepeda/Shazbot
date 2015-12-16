@@ -50,6 +50,10 @@ IRC.prototype.data = function(data) {
 	return IRC.data(this, data);
 };
 
+IRC.data = function(irc, data) {
+	console.log(data);
+};
+
 IRC.connect = function(irc, host, port, cb) {
 	irc.socket.setEncoding("utf8");
 

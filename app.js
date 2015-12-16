@@ -3,11 +3,12 @@ var express = require('express');
 var bodyparser = require("body-parser");
 var app = express();
 var http = require('http').Server(app);
-
+var io = require('socket.io')(http);
 var path = require("path");
 var fs = require('fs');
 
 var config = require('./config');
+var bootstrap_socket = require('./resources/socket');
 
 process.stdin.resume();
 process.stdin.setEncoding('utf8');
@@ -43,26 +44,6 @@ app.get('/lib/:name', function(req, res){
 	}
 });
 
+bootstrap_socket(io);
 //Server
-http.listen(8001, function() { console.log('listening on *:8001'); });
-app.use(express.static(__dirname + '/client'));
-
-process.stdin.on('data', function (text) {
-	var msg = util.inspect(text);
-	if (msg === 'quit\n') {
-		done();
-	} else {
-		msg = msg.replace(/'|\\n/g, "");
-		var args = msg.split(" ");
-		var recipient = "#" + args.shift();
-
-		var cmd = "shaz " + args.join(" ");
-		console.log(cmd);
-		bot.parse(cmd).then(bot.outputTo(recipient)).catch(bot.error);
-	}
-});
-
-function done() {
-	console.log('Now that process.stdin is paused, there is nothing more to do.');
-	process.exit();
-}
+http.listen(8002, function() { console.log('listening on *:8001'); });
