@@ -22,7 +22,7 @@ var bootstrap_socket = function(io) {
 
 		bot.on("privmsg", function(entity, args) {
 			var profile = new Profile(entity);
-			socket.emit("privmsg", { room:args[0], from:profile.nick, msg:args[1] });
+			socket.emit("privmsg", { room:args[0], from:profile.nick, message:args[1] });
 		});
 
 		bot.on("nicknames", function(entity, args) {

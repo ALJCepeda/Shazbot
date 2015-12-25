@@ -31,7 +31,7 @@
 <body>
 	<div id="navbar" class="col-nw m-start c-center" style="width:150px; height:100%; position:absolute; left:0; top:0; border-right:1px solid black; background:black;">
 		<div class="col-nw m-start c-stretch" style="width:100%; height:95%;" data-bind="foreach: tabs">
-			<button style="height:5%; width:100%" data-bind="text: text, click: click"></button>
+			<button style="height:5%; width:100%" data-bind="text: label, click: click"></button>
 		</div>
 
 		<button id="connect" style="height:5%; width:100%;">Submit</button>
@@ -48,21 +48,48 @@
 <script>
 
 var socket = io();
+var User = function(nick) {
+	this.nick = nick;
+	this.rooms = [];
+	this.messages = {};
+
+	this.addRoom = function(room) {
+		
+	}
+	this.addMessage = function(room, message) {
+
+	};
+}
+
+var Chatroom = function(name) {
+	this.name = name;
+	this.users = ko.observable([]);
+	this.messages = ko.observable([]);
+
+	this.addMessage = function(nick, msg) {
+		var message = this.users[nick].addMessage(msg);
+		this.messages.push(message);
+	};
+};
+
 var Navbar = function() {
 	var self = this;
-	this.rooms = ko.observableArray([]);
+	this.rooms = ko.observable({});
 	this.tabs = ko.computed(function() {
 		var rooms = self.rooms();
+		var result = [];
 
-		return rooms.map(function(room, index) {
-			return { text:room, click:function() {
-				self.selectRoom(room, index);
-			}};
-		});
+		for(var key in rooms) {
+			result.push({ label:key, click:function() {
+				self.selectRoom(key)
+			}});
+		}
+
+		return result;
 	});
 
-	this.selectRoom = function(room, index) {
-		console.log("Selected room: " + room);
+	this.selectRoom = function(name) {
+		console.log("Selected room: " + name);
 	};
 };
 
@@ -76,8 +103,17 @@ socket.on("data", function(data) {
 	ul.appendChild(li);
 });
 
-socket.on("didJoin", function(data) {
-	navbar.rooms.push(data.room);
+socket.on("joined", function(data) {
+	var room = new Chatroom(data.room);
+	var rooms = navbar.rooms();
+	rooms[room.name] = room;
+
+	navbar.rooms(rooms);
+});
+
+socket.on("privmsg", function(data) {
+	var rooms = navbar.rooms();
+	//rooms[data.room].
 });
 
 var inputBox = document.getElementById("inputBox");

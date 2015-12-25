@@ -143,7 +143,7 @@ Bot.prototype.connect = function(nick, password, server, port) {
 		});
 		//366 is good for joining rooms
 		irc.on("366", function(entity, args) {
-			self.emit("didJoin", entity, args);
+			self.emit("joined", entity, args);
 		});
 
 		if(self.isRegistered === true) {
