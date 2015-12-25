@@ -28,17 +28,21 @@
     </style>
 </head>
 
-<body>
+<body id="bodyContainer">
 	<div id="navbar" class="col-nw m-start c-center" style="width:150px; height:100%; position:absolute; left:0; top:0; border-right:1px solid black; background:black;">
-		<div class="col-nw m-start c-stretch" style="width:100%; height:95%;" data-bind="foreach: tabs">
-			<button style="height:5%; width:100%" data-bind="text: label, click: click"></button>
+		<div class="col-nw m-start c-stretch" style="width:100%; height:95%;" data-bind="foreach: rooms">
+			<button style="height:5%; width:100%" data-bind="text: name, click: shouldSelect"></button>
 		</div>
 
 		<button id="connect" style="height:5%; width:100%;">Submit</button>
 	</div>
 
-	<div id="content_container" style="position:absolute; left:150px; right:0; top:0; bottom:38px; overflow:auto;">
-		<ul id="data"></ul>	
+	<div id="content_container" style="position:absolute; left:150px; right:0; top:0; bottom:38px; overflow:auto;" data-bind="foreach: rooms">
+		<div data-bind="visible:isVisible">
+			<ul data-bind="foreach:messages">
+				<li><span data-bind="text:$data"></span></li>
+			</ul>
+		</div>
 	</div>
 
 
@@ -63,56 +67,53 @@ var User = function(nick) {
 
 var Chatroom = function(name) {
 	this.name = name;
-	this.users = ko.observable([]);
-	this.messages = ko.observable([]);
+	this.isVisible = ko.observable(false);
+	this.users = ko.observableArray([]);
+	this.messages = ko.observableArray([]);
 
 	this.addMessage = function(nick, msg) {
 		var message = this.users[nick].addMessage(msg);
 		this.messages.push(message);
 	};
+
+	this.shouldSelect = function(e) {
+		throw new Error("shouldSelect needs to be overwritten");
+	};
 };
 
-var Navbar = function() {
+var Model = function() {
 	var self = this;
-	this.rooms = ko.observable({});
-	this.tabs = ko.computed(function() {
-		var rooms = self.rooms();
-		var result = [];
-
-		for(var key in rooms) {
-			result.push({ label:key, click:function() {
-				self.selectRoom(key)
-			}});
-		}
-
-		return result;
-	});
+	this.rooms = ko.observableArray([]);
 
 	this.selectRoom = function(name) {
 		console.log("Selected room: " + name);
 	};
+
+	var dataRoom = new Chatroom('data', function() {
+		self.selectRoom('data');
+	});
+	dataRoom.isVisible(true);
+	this.rooms.push(dataRoom);
 };
 
-var navbar = new Navbar();
+var model = new Model();
 
 socket.on("data", function(data) {
-	console.log(data);
-	var ul = document.getElementById("data");
-	var li = document.createElement("li");
-	li.appendChild(document.createTextNode(data));
-	ul.appendChild(li);
+	var dataRoom = model.rooms()[0];
+	dataRoom.messages.push(data);
 });
 
 socket.on("joined", function(data) {
 	var room = new Chatroom(data.room);
-	var rooms = navbar.rooms();
-	rooms[room.name] = room;
+	room.shouldSelect = function(e) {
+		model.selectRoom(room.name);
+	};
 
-	navbar.rooms(rooms);
+	model.rooms.push(room);
 });
 
 socket.on("privmsg", function(data) {
-	var rooms = navbar.rooms();
+	var rooms = model.rooms();
 	//rooms[data.room].
 });
 
@@ -127,6 +128,6 @@ document.onkeyup = function() {
 	}
 }
 
-ko.applyBindings(navbar, document.getElementById("navbar"));
+ko.applyBindings(model, document.getElementById("bodyContainer"));
 </script>
 </html>
