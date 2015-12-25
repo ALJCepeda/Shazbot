@@ -65,7 +65,8 @@ var User = function(nick) {
 	};
 }
 
-var Chatroom = function(name) {
+var Chatroom = function(name, options) {
+	options = options || {};
 	this.name = name;
 	this.isVisible = ko.observable(false);
 	this.users = ko.observableArray([]);
@@ -76,24 +77,46 @@ var Chatroom = function(name) {
 		this.messages.push(message);
 	};
 
-	this.shouldSelect = function(e) {
+	this.shouldSelect = function() {
 		throw new Error("shouldSelect needs to be overwritten");
 	};
+	this.isVisible = function() {
+		throw new Error("isVisible needs to be overwritten");
+	};
+
+	if(options.shouldSelect) {
+		this.shouldSelect = options.shouldSelect.bind(this);
+	}
+	if(options.isVisible) {
+		var isVisible = options.isVisible.bind(this);
+		this.isVisible = ko.computed(isVisible);
+	}
 };
 
 var Model = function() {
 	var self = this;
 	this.rooms = ko.observableArray([]);
+	this.selectedRoom = ko.observable({});
 
-	this.selectRoom = function(name) {
-		console.log("Selected room: " + name);
+	this.isVisible = function(item) {
+		debugger;
+		return this.selectedRoom === item;
+	}
+	this.selectRoom = function(index) {
+		var room = self.rooms()[index];
+		self.selectedRoom(room);
 	};
 
-	var dataRoom = new Chatroom('data', function() {
-		self.selectRoom('data');
+	var dataRoom = new Chatroom('data', {
+		shouldSelect:function() {
+			self.selectRoom(0);
+		}, isVisible:function() {
+			return self.selectedRoom().name === this.name;
+		}
 	});
-	dataRoom.isVisible(true);
+	
 	this.rooms.push(dataRoom);
+	this.selectedRoom(dataRoom);
 };
 
 var model = new Model();
@@ -104,10 +127,14 @@ socket.on("data", function(data) {
 });
 
 socket.on("joined", function(data) {
-	var room = new Chatroom(data.room);
-	room.shouldSelect = function(e) {
-		model.selectRoom(room.name);
-	};
+	var length = model.rooms().length;
+	var room = new Chatroom(data.room, {
+		shouldSelect:function() {
+			model.selectRoom(length);
+		}, isVisible:function() {
+			return model.selectedRoom().name === this.name;
+		}
+	});
 
 	model.rooms.push(room);
 });
