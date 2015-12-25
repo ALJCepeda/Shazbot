@@ -40,7 +40,7 @@
 	<div id="content_container" style="position:absolute; left:150px; right:0; top:0; bottom:38px; overflow:auto;" data-bind="foreach: rooms">
 		<div data-bind="visible:isVisible">
 			<ul data-bind="foreach:messages">
-				<li><span data-bind="text:$data"></span></li>
+				<li><span data-bind="text:toString()"></span></li>
 			</ul>
 		</div>
 	</div>
@@ -65,7 +65,21 @@ var User = function(nick) {
 	};
 }
 
+var Message = function(nick, message) {
+	this.nick = nick;
+	this.message = message;
+
+	this.toString = function() {
+		if(this.nick) {
+			return this.nick + ": " + this.message;
+		} else {
+			return this.message;
+		}
+	}
+}
+
 var Chatroom = function(name, options) {
+	var self = this;
 	options = options || {};
 	this.name = name;
 	this.isVisible = ko.observable(false);
@@ -73,8 +87,8 @@ var Chatroom = function(name, options) {
 	this.messages = ko.observableArray([]);
 
 	this.addMessage = function(nick, msg) {
-		var message = this.users[nick].addMessage(msg);
-		this.messages.push(message);
+		var message = new Message(nick, msg);
+		self.messages.push(message);
 	};
 
 	this.shouldSelect = function() {
@@ -95,6 +109,7 @@ var Chatroom = function(name, options) {
 
 var Model = function() {
 	var self = this;
+	this.roomIndex = {};
 	this.rooms = ko.observableArray([]);
 	this.selectedRoom = ko.observable({});
 
@@ -105,6 +120,29 @@ var Model = function() {
 	this.selectRoom = function(index) {
 		var room = self.rooms()[index];
 		self.selectedRoom(room);
+	};
+
+	this.didJoin = function(name) {
+		var length = self.rooms().length;
+		var room = new Chatroom(name, {
+			shouldSelect:function() {
+				self.selectRoom(length);
+			}, isVisible:function() {
+				return self.selectedRoom().name === this.name;
+			}
+		});
+
+		self.roomIndex[name] = {
+			index:length,
+			value:room
+		};
+
+		self.rooms.push(room);
+	};
+
+	this.privmsg = function(roomname, nick, message) {
+		var room = self.roomIndex[roomname].value;
+		room.addMessage(nick, message);
 	};
 
 	var dataRoom = new Chatroom('data', {
@@ -123,25 +161,15 @@ var model = new Model();
 
 socket.on("data", function(data) {
 	var dataRoom = model.rooms()[0];
-	dataRoom.messages.push(data);
+	dataRoom.messages.push(new Message(null, data));
 });
 
 socket.on("joined", function(data) {
-	var length = model.rooms().length;
-	var room = new Chatroom(data.room, {
-		shouldSelect:function() {
-			model.selectRoom(length);
-		}, isVisible:function() {
-			return model.selectedRoom().name === this.name;
-		}
-	});
-
-	model.rooms.push(room);
+	model.didJoin(data.room);
 });
 
 socket.on("privmsg", function(data) {
-	var rooms = model.rooms();
-	//rooms[data.room].
+	model.privmsg(data.room, data.from, data.message);
 });
 
 var inputBox = document.getElementById("inputBox");
