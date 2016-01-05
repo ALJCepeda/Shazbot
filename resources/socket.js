@@ -41,7 +41,7 @@ var bootstrap_socket = function(io) {
 			if(message[0] === "/") {
 				message = message.slice(1, message.length);
 
-				if(message === "connect") {
+				if(message === "connect" && bot.isConnected === false) {
 					try {
 						bot.connect("Shazbot", "gooman10", "chat.freenode.net", 6667, function() {
 							console.log(irc.socket.address());	
@@ -49,11 +49,11 @@ var bootstrap_socket = function(io) {
 					} catch(exception) {
 						throw exception;
 					}
-				} else {
+				} else if(bot.isConnected === true) {
 					irc.raw(message);
 					socket.emit("output", { room:"output", message:message });
 				}
-			} else {
+			} else if(bot.isConnected === true){
 				bot.say(room, message);
 				socket.emit("output", { room:room, from:bot.nick, message:message });
 			}

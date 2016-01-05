@@ -9,6 +9,8 @@ var Bot = function(irc) {
 	this.user = "Literphor";
 	this.info = "NodeJS Bot";
 	this.password = "";
+
+	this.isConnected = false;
 	this.isRegistered = false;
 	this.anonymousUse = false;
 
@@ -91,12 +93,6 @@ Bot.prototype.parse = function(str) {
 	var info = this.split(str);
 	var promise = Promise.resolve("");
 
-	/*if(info.valid === true) {
-		if(this.hasCommand(info.cmd) === true) {
-			var response = 
-		}
-	}*/
-
 	if(info.valid === true && (isLocal === true || this.isTargeted(info.target) === true)) {
 		if(this.hasCommand(info.cmd) === true) {
 			var response = bot.commandFor(info.cmd);
@@ -169,6 +165,7 @@ Bot.prototype.connect = function(nick, password, server, port, complete) {
 			});
 		}
 
+		this.isConnected = true;
 		complete();
 	});
 };
