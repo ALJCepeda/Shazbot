@@ -120,7 +120,7 @@ Bot.prototype.emit = function(cmd, entity, data) {
 	}
 };
 
-Bot.prototype.connect = function(nick, password, server, port) {
+Bot.prototype.connect = function(nick, password, server, port, complete) {
 	var self = this;
 	var irc = self.irc;
 	console.log("Connecting to irc...");
@@ -168,6 +168,8 @@ Bot.prototype.connect = function(nick, password, server, port) {
 				return true;
 			});
 		}
+
+		complete();
 	});
 };
 

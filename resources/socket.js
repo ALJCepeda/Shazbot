@@ -17,12 +17,12 @@ var bootstrap_socket = function(io) {
 
 		bot.on("joined", function(entity, args) {
 			var info = args[0].split(" ");
-			socket.emit("joined", { room:info[1], entity:entity, args:args });
+			socket.emit("addRoom", { room:info[1] });
 		});
 
 		bot.on("privmsg", function(entity, args) {
 			var profile = new Profile(entity);
-			socket.emit("privmsg", { room:args[0], from:profile.nick, message:args[1] });
+			socket.emit("output", { room:args[0], from:profile.nick, message:args[1] });
 		});
 
 		bot.on("nicknames", function(entity, args) {
@@ -36,22 +36,26 @@ var bootstrap_socket = function(io) {
 
 		socket.on('message', function(data) {
 			var room = data.room;
-			var msg = data.message;
+			var message = data.message;
 
-			if(msg[0] === "/") {
-				msg = msg.slice(1, msg.length);
+			if(message[0] === "/") {
+				message = message.slice(1, message.length);
 
-				if(msg === "connect") {
+				if(message === "connect") {
 					try {
-						bot.connect("Shazbot", "gooman10", "chat.freenode.net", 6667);	
+						bot.connect("Shazbot", "gooman10", "chat.freenode.net", 6667, function() {
+							console.log(irc.socket.address());	
+						});
 					} catch(exception) {
 						throw exception;
 					}
 				} else {
-					irc.raw(msg);
+					irc.raw(message);
+					socket.emit("output", { room:"output", message:message });
 				}
 			} else {
-				bot.say(msg);
+				bot.say(room, message);
+				socket.emit("output", { room:room, from:bot.nick, message:message });
 			}
 		});
 	});
