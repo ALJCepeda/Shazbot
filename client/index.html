@@ -50,7 +50,6 @@
 </body>
 
 <script>
-
 var socket = io();
 var User = function(nick) {
 	this.nick = nick;
@@ -82,7 +81,6 @@ var Chatroom = function(name, options) {
 	var self = this;
 	options = options || {};
 	this.name = name;
-	this.isVisible = ko.observable(false);
 	this.users = ko.observableArray([]);
 	this.messages = ko.observableArray([]);
 
@@ -113,13 +111,14 @@ var Model = function() {
 	this.rooms = ko.observableArray([]);
 	this.selectedRoom = ko.observable({});
 
-	this.isVisible = function(item) {
-		debugger;
-		return this.selectedRoom === item;
-	}
 	this.selectRoom = function(index) {
 		var room = self.rooms()[index];
 		self.selectedRoom(room);
+	};
+
+	this.data = function(data) {
+		var dataRoom = self.rooms()[0];
+		dataRoom.messages.push(new Message(null, data));
 	};
 
 	this.didJoin = function(name) {
@@ -159,10 +158,7 @@ var Model = function() {
 
 var model = new Model();
 
-socket.on("data", function(data) {
-	var dataRoom = model.rooms()[0];
-	dataRoom.messages.push(new Message(null, data));
-});
+socket.on("data", model.data);
 
 socket.on("joined", function(data) {
 	model.didJoin(data.room);
@@ -175,9 +171,15 @@ socket.on("privmsg", function(data) {
 var inputBox = document.getElementById("inputBox");
 document.onkeyup = function() {
 	if(window.event.keyCode === 13) {
-		var msg = inputBox.value;
-		if(msg !== "") {
-			socket.emit("msg", msg);
+		var message = inputBox.value;
+		if(message !== "") {
+			var room = model.selectedRoom();
+			socket.emit("input", {
+				room:room.name,
+				message:message
+			});
+
+			room.addMessage("Me", message);
 			inputBox.value = "";
 		}
 	}

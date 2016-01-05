@@ -38,14 +38,14 @@ var bootstrap_socket = function(io) {
 			if(msg[0] === "/") {
 				msg = msg.slice(1, msg.length);
 
-				if(msg !== "connect") {
-					irc.raw(msg);
-				} else {
+				if(msg === "connect") {
 					try {
 						bot.connect("Shazbot", "gooman10", "chat.freenode.net", 6667);	
 					} catch(exception) {
 						throw exception;
 					}
+				} else {
+					irc.raw(msg);
 				}
 			} else {
 				bot.say(msg);
