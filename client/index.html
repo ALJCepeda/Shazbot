@@ -168,20 +168,24 @@ socket.on("privmsg", function(data) {
 	model.privmsg(data.room, data.from, data.message);
 });
 
+function submitMessage() {
+	var message = inputBox.value;
+	if(message !== "") {
+		var room = model.selectedRoom();
+		socket.emit("message", {
+			room:room.name,
+			message:message
+		});
+
+		room.addMessage("Me", message);
+		inputBox.value = "";
+	}
+}
+
 var inputBox = document.getElementById("inputBox");
 document.onkeyup = function() {
 	if(window.event.keyCode === 13) {
-		var message = inputBox.value;
-		if(message !== "") {
-			var room = model.selectedRoom();
-			socket.emit("input", {
-				room:room.name,
-				message:message
-			});
-
-			room.addMessage("Me", message);
-			inputBox.value = "";
-		}
+		submitMessage();
 	}
 }
 

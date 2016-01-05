@@ -34,7 +34,10 @@ var bootstrap_socket = function(io) {
 			socket.emit("nicknames", { room:ent[1], nicknames:nicks });
 		});
 
-		socket.on('msg', function(msg) {
+		socket.on('message', function(data) {
+			var room = data.room;
+			var msg = data.message;
+
 			if(msg[0] === "/") {
 				msg = msg.slice(1, msg.length);
 
