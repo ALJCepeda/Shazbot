@@ -59,10 +59,10 @@ var socket = io();
 var irc = new IRC();
 var inputBox = document.getElementById("inputBox");
 
-socket.on("output", function(data) {
+socket.on("data", function(data) {
 	var room = data.room || "output";
 	var from = data.from;
-	var message = data.message;
+	var message = data.message || data;
 
 	irc.output(room, from, message);
 });
@@ -89,7 +89,6 @@ function submitMessage() {
 		inputBox.value = "";
 	}
 }
-
 
 document.onkeyup = function() {
 	if(window.event.keyCode === 13) {

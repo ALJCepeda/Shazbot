@@ -19,7 +19,7 @@ IRC.prototype.addRoom = function(name) {
 		shouldSelect:function() {
 			this.selectRoom(length);
 		}.bind(this), isVisible:function() {
-			return this.selectedRoom().name === this.name;
+			return this.selectedRoom().name === name;
 		}.bind(this)
 	});
 

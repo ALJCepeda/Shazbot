@@ -22,7 +22,7 @@ var bootstrap_socket = function(io) {
 
 		bot.on("privmsg", function(entity, args) {
 			var profile = new Profile(entity);
-			socket.emit("output", { room:args[0], from:profile.nick, message:args[1] });
+			socket.emit("data", { room:args[0], from:profile.nick, message:args[1] });
 		});
 
 		bot.on("nicknames", function(entity, args) {
@@ -39,12 +39,11 @@ var bootstrap_socket = function(io) {
 			var message = data.message;
 
 			if(message[0] === "/") {
-				message = message.slice(1, message.length);
-
-				if(message === "connect" && bot.isConnected === false) {
+				var args = message.split(" ");
+				if(args[0] === "/connect" && bot.isConnected === false) {
 					try {
-						bot.connect("Shazbot", "gooman10", "chat.freenode.net", 6667, function() {
-							console.log(irc.socket.address());	
+						bot.connect(args[1], args[2], args[3], 6667, function() {
+							socket.emit("connected");
 						});
 					} catch(exception) {
 						throw exception;
@@ -59,8 +58,6 @@ var bootstrap_socket = function(io) {
 			}
 		});
 	});
-
-
 };
 
 module.exports = bootstrap_socket;
