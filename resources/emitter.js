@@ -1,3 +1,5 @@
+var _ = require("underscore");
+
 var Emitter = function() {
 	this.listeners = {};
 };
@@ -26,7 +28,7 @@ Emitter.prototype.emit = function(command, entity, data) {
 	var listeners = this.listeners[command];
 
 	if(!_.isUndefined(listeners)) {
-		this.listeners[cmd] = listeners.filter(function(entry) {
+		this.listeners[command] = listeners.filter(function(entry) {
 			entry[0](entity, data);
 			return entry[1] === false;
 		});

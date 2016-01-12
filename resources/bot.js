@@ -10,6 +10,8 @@ var Emitter = require("./emitter");
 var Obj = require(path.join(config.dirs.shared, "object", "obj.js"));
 
 var Bot = function(irc) {
+	Obj.assign(this, new Emitter());
+	
 	this.nick = "";
 	this.user = "Literphor";
 	this.info = "NodeJS Bot";
@@ -21,11 +23,10 @@ var Bot = function(irc) {
 
 	this.channels = [];
 	this.commands = commands;
-	this.listeners = {};
 	this.irc = irc;
 };
 
-Obj.assign(Bot.prototype, Emitter.prototype);
+Obj.assign(Bot.prototype, Emitter.prototype, true);
 
 Bot.prototype.split = function(str) {
 	var isValid = false;
@@ -99,7 +100,7 @@ Bot.prototype.parse = function(str) {
 Bot.prototype.connect = function(nick, password, server, port, complete) {
 	var self = this;
 	var irc = self.irc;
-	console.log("Connecting to irc...");
+	console.log("Connecting to " + server + ": " + port);
 
 	irc.connect(server, port, function() {
 		self.changeUser(this.user, this.info);
