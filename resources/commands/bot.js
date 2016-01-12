@@ -2,11 +2,6 @@ var Profile = require("../profile");
 var Promise = require("promise");
 var Dockerizer = require("/shared/dockerizer/dockerizer");
 
-function uncurlQuotes(str) {
-	var result = str.replace(/“|”/g, '"').replace(/‘|’/g, "'");
-	return result;
-}
-
 bootstrap_botcmds = function(bot, socket) {
 	bot.on("joined", function(entity, args) {
 		var info = args[0].split(" ");
@@ -44,6 +39,19 @@ bootstrap_botcmds = function(bot, socket) {
 				return Promise.resolve(result);
 			}, alias: ["say"]
 		},
+		aa: {
+			action: function(args, prefix) {
+				if(args[0] === "true") {
+					bot.anonymousUse = true;
+					return Promise.resolve("Anonymous use now allowed");
+				} else if (args[0] === "false") {
+					bot.anonymousUse = false;
+					return Promise.resolve("Anonymous use now denied");
+				}
+
+				return Promise.resolve("No action taken");
+			}
+		},
 		lgt: {
 			action:function(args, prefix) {
 				var query = args.join("+");
@@ -61,7 +69,6 @@ bootstrap_botcmds = function(bot, socket) {
 				var docker = new Dockerizer('/var/tmp/shazbot');
 				var code = args.join(" ");
 
-				code = uncurlQuotes(code);
 				code = "<?php " + code;
 
 				docker.stopAfter = 5000;
@@ -86,7 +93,6 @@ bootstrap_botcmds = function(bot, socket) {
 			action:function(args, prefix) {
 				var docker = new Dockerizer('/var/tmp/shazbot');
 				var code = args.join(" ");
-				code = uncurlQuotes(code);
 
 				docker.stopAfter = 5000;
 				return docker.execute(code, "nodejs", "latest").then(function(data) {
