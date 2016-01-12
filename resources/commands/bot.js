@@ -17,12 +17,16 @@ bootstrap_botcmds = function(bot, socket) {
 	});
 
 	bot.on("nicknames", function(entity, args) {
-		var ent = entity.split(" = ");
-		var user = ent[0];
-		var room = ent[1];
-		var nicks = args[1].split(" ");
+		if(typeof args[1] !== "undefined") {
+			var ent = entity.split(" = ");
+			var user = ent[0];
+			var room = ent[1];
+			var nicks = args[1].split(" ");
 
-		socket.emit("nicknames", { room:ent[1], nicknames:nicks });
+			socket.emit("nicknames", { room:ent[1], nicknames:nicks });
+		}
+
+		socket.emit("data", args.join(" "));
 	});
 
 	bot.on("said", function(target, message) {

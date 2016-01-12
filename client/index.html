@@ -44,7 +44,7 @@
 
 	<div id="content_container" style="position:absolute; left:150px; right:0; top:0; bottom:38px; overflow:auto;" data-bind="foreach: rooms">
 		<div data-bind="visible:isVisible">
-			<ul data-bind="foreach:messages">
+			<ul id="messages" data-bind="foreach:messages">
 				<li><span data-bind="text:toString()"></span></li>
 			</ul>
 		</div>

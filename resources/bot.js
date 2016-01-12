@@ -47,9 +47,13 @@ Bot.prototype.connect = function(nick, password, server, port, complete) {
 		});
 
 		//353 is list of names in room
+		/*
+		Causing issues
 		irc.on("353", function(entity, args) {
 			self.emit("nicknames", entity, args);
 		});
+		*/
+		
 		//366 is good for joining rooms
 		irc.on("366", function(entity, args) {
 			self.emit("joined", entity, args);
