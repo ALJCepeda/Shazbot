@@ -32,12 +32,9 @@ bootstrap_botcmds = function(bot, socket) {
 				var message = args.join(" ");
 				var result = prefix + message;
 
-				if(prefix !== "") {
-					result = prefix + " " + result;
-				}
-
 				return Promise.resolve(result);
-			}, alias: ["say"]
+			}, 
+			alias: ["say"]
 		},
 		aa: {
 			action: function(args, prefix) {
@@ -56,10 +53,6 @@ bootstrap_botcmds = function(bot, socket) {
 			action:function(args, prefix) {
 				var query = args.join("+");
 				var result = "{0}Lets google that! http://lmgtfy.com/?q={1}".supplant([prefix, query]);
-
-				if(prefix !== "") {
-					result = prefix + " " + result;
-				}
 
 				return Promise.resolve(result);
 			}

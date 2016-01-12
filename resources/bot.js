@@ -96,7 +96,7 @@ Bot.prototype.split = function(str) {
 		cmd = args.shift();
 
 		if(cmd.indexOf("@") === 0) {
-			prefix = cmd.slice(1, cmd.length);
+			prefix = cmd.slice(1, cmd.length) + " ";
 			cmd = args.shift();
 		}
 
