@@ -51,7 +51,7 @@ describe("Profile", function() {
 			}).catch(done);
 		});
 
-		it("nodejs curly quotes", function(done) {
+		it("nodejs", function(done) {
 			bot.parse("shaz nodejs var foo = “bar”; console.log(foo);").then(function(result) {
 				result.should.equal("bar");
 				done();

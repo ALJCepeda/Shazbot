@@ -112,7 +112,15 @@ bootstrap_botcmds = function(bot, socket) {
 						
 						result = parts;
 					} else {
-						result = data.stdout.replace("\n", "");
+						result = data.stdout.split("\n");
+
+						if(result[result.length - 1] === "") {
+							result = result.slice(0, -1);
+						}
+
+						if(result.length === 1) {
+							result = result[0];
+						}
 					}
 				
 					return Promise.resolve(result);
