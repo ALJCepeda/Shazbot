@@ -1,17 +1,24 @@
 var Bot = require("./bot");
 var IRC = require("./irc");
 var Profile = require("./profile");
+var Slasher = require("./slasher");
+
+var bootstrap_slasher = require("./commands/slash");
 
 var bootstrap_socket = function(io) {
 	io.on('connection', function(socket) {
 		console.log("User connected..");
 
 		var irc = new IRC();
+		var bot = new Bot(irc);
+		var slasher = new Slasher();
+
+		bootstrap_slasher(slasher, bot, socket);
+
 		irc.data = function(data) {
 			io.emit("data", data);
 		};
 
-		var bot = new Bot(irc);
 		bot.channels = ["botwar"];
 		bot.isRegistered = true;
 
@@ -38,23 +45,12 @@ var bootstrap_socket = function(io) {
 			var room = data.room;
 			var message = data.message;
 
-			if(message[0] === "/") {
-				var args = message.split(" ");
-				if(args[0] === "/connect" && bot.isConnected === false) {
-					try {
-						bot.connect(args[1], args[2], args[3], 6667, function() {
-							socket.emit("connected");
-						});
-					} catch(exception) {
-						throw exception;
-					}
-				} else if(bot.isConnected === true) {
-					irc.raw(message);
-					socket.emit("output", { room:"output", message:message });
+			var isValid = slasher.parse(message);
+			if(isValid === false) {
+				if(bot.isConnected === true) {
+					bot.say(room, message);
+					socket.emit("output", { room:room, from:bot.nick, message:message });
 				}
-			} else if(bot.isConnected === true){
-				bot.say(room, message);
-				socket.emit("output", { room:room, from:bot.nick, message:message });
 			}
 		});
 	});
