@@ -15,7 +15,7 @@ bootstrap_botcmds = function(bot, socket) {
 
 	bot.on("privmsg", function(entity, args) {
 		var profile = new Profile(entity);
-		socket.emit("data", { room:args[0], from:profile.nick, message:args[1] });
+		socket.emit("output", { room:args[0], from:profile.nick, message:args[1] });
 	});
 
 	bot.on("nicknames", function(entity, args) {
@@ -25,6 +25,10 @@ bootstrap_botcmds = function(bot, socket) {
 		var nicks = args[1].split(" ");
 
 		socket.emit("nicknames", { room:ent[1], nicknames:nicks });
+	});
+
+	bot.on("said", function(target, message) {
+		socket.emit("output", { room:target, from:bot.nick, message:message });
 	});
 
 	bot.commands = {

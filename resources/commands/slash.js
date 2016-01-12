@@ -1,8 +1,8 @@
 var bootstrap_slashercmds = function(slasher, bot, socket) {
 	slasher.onNone = function(command, args) {
-		var message = args.join(" ");
-		bot.irc.raw(command + " " + message);
-		socket.emit("output", { room:"output", message:message });
+		var message = command + " " + args.join(" ");
+		bot.irc.raw(message);
+		socket.emit("data", message);
 	};
 
 	slasher.on("connect", function(args) {

@@ -7,7 +7,7 @@ bootstrap_socketcmds = function(socket, bot, slasher) {
 		if(isValid === false) {
 			if(bot.isConnected === true) {
 				bot.say(room, message);
-				socket.emit("output", { room:room, from:bot.nick, message:message });
+				bot.respondTo(room, message);
 			}
 		}
 	});

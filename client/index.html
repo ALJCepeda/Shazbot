@@ -59,12 +59,12 @@ var socket = io();
 var irc = new IRC();
 var inputBox = document.getElementById("inputBox");
 
-socket.on("data", function(data) {
-	var room = data.room || "output";
-	var from = data.from;
-	var message = data.message || data;
+socket.on("data", function(message) {
+	irc.data(message);
+});
 
-	irc.output(room, from, message);
+socket.on("output", function(data) {
+	irc.output(data.room, data.from, data.message);
 });
 
 socket.on("addRoom", function(data) {

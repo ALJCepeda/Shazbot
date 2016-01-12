@@ -27,6 +27,62 @@ var Bot = function(irc) {
 
 Obj.assign(Bot.prototype, Emitter.prototype, true);
 
+Bot.prototype.connect = function(nick, password, server, port, complete) {
+	var self = this;
+	var irc = self.irc;
+	console.log("Connecting to " + server + ": " + port);
+
+	irc.connect(server, port, function() {
+		self.changeUser(self.user, self.info);
+		self.changeNick(nick);
+
+		irc.on("PING", function(entity, args) {
+			self.PING(entity, args);
+		});
+
+		irc.on("PRIVMSG", function(entity, args) {
+			self.emit("privmsg", entity, args);
+
+			self.PRIVMSG(entity, args);
+		});
+
+		//353 is list of names in room
+		irc.on("353", function(entity, args) {
+			self.emit("nicknames", entity, args);
+		});
+		//366 is good for joining rooms
+		irc.on("366", function(entity, args) {
+			self.emit("joined", entity, args);
+		});
+
+		if(self.isRegistered === true) {
+			irc.on("NOTICE", function(entity, args) {
+				var profile = new Profile(entity);
+
+				if(profile.nick === "NickServ") {
+					if(args[1].indexOf("registered") >= 0) {
+						self.identify(password);
+					}
+
+					if(args[1].indexOf("identified") >= 0) {
+						self.joinChannels();
+					}
+				}
+
+				return true;
+			});
+		} else {
+			irc.on_once("MODE", function(entity, args) {
+				self.joinChannels();
+				return true;
+			});
+		}
+
+		self.isConnected = true;
+		complete();
+	});
+};
+
 Bot.prototype.split = function(str) {
 	var isValid = false;
 
@@ -96,60 +152,6 @@ Bot.prototype.parse = function(str) {
 	return promise;
 };
 
-Bot.prototype.connect = function(nick, password, server, port, complete) {
-	var self = this;
-	var irc = self.irc;
-	console.log("Connecting to " + server + ": " + port);
-
-	irc.connect(server, port, function() {
-		self.changeUser(this.user, this.info);
-		self.changeNick(nick);
-
-		irc.on("PING", function(entity, args) {
-			self.PING(entity, args);
-		});
-
-		irc.on("PRIVMSG", function(entity, args) {
-			self.emit("privmsg", entity, args);
-		});
-
-		//353 is list of names in room
-		irc.on("353", function(entity, args) {
-			self.emit("nicknames", entity, args);
-		});
-		//366 is good for joining rooms
-		irc.on("366", function(entity, args) {
-			self.emit("joined", entity, args);
-		});
-
-		if(self.isRegistered === true) {
-			irc.on("NOTICE", function(entity, args) {
-				var profile = new Profile(entity);
-
-				if(profile.nick === "NickServ") {
-					if(args[1].indexOf("registered") >= 0) {
-						self.identify(password);
-					}
-
-					if(args[1].indexOf("identified") >= 0) {
-						self.joinChannels();
-					}
-				}
-
-				return true;
-			});
-		} else {
-			irc.on_once("MODE", function(entity, args) {
-				self.joinChannels();
-				return true;
-			});
-		}
-
-		this.isConnected = true;
-		complete();
-	});
-};
-
 Bot.prototype.joinChannels = function() {
 	this.channels.forEach(function(channel) {
 		this.join(channel);
@@ -161,13 +163,15 @@ Bot.prototype.PING = function(entity, args) {
 };
 
 Bot.prototype.outputTo = function(recipient) {
+	var self = this;
+
 	return function(msg) {
 		if(_.isArray(msg)) {
 			msg.forEach(function(line) {
-				this.say(recipient, line);
+				self.say(recipient, line);
 			})
 		} else if(msg !== ""){
-			this.say(recipient, msg);
+			self.say(recipient, msg);
 		}
 	};
 };
@@ -180,16 +184,19 @@ Bot.prototype.PRIVMSG = function(entity, args) {
 	var profile = new Profile(entity);
 
 	if(this.anonymousUse === true || profile.isAdmin() === true) {
-		var promise = this.parse(args[1]) || "";
-
 		var recipient = args[0] === this.nick ? profile.nick : args[0];
-
-		promise.then(this.outputTo(recipient)).catch(this.error);
+		this.respondTo(recipient, args[1]);
 	}
 };
 
+Bot.prototype.respondTo = function(target, message) {
+	var promise = this.parse(message) || "";
+
+	promise.then(this.outputTo(target)).catch(this.error);
+}
 Bot.prototype.say = function(target, message) {
 	this.irc.raw("PRIVMSG {0} :{1}".supplant([target, message]));
+	this.emit("said", target, message);
 };
 
 Bot.prototype.changeUser = function(user, info) {

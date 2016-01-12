@@ -4,7 +4,7 @@ var IRC = function() {
 	this.rooms = ko.observableArray([]);
 	this.selectedRoom = ko.observable({});
 
-	this.addRoom("output");
+	this.addRoom("data");
 	this.selectRoom(0);
 };
 
@@ -51,6 +51,10 @@ IRC.prototype.leaveRoom = function(name) {
 	}
 
 	return false;
+};
+
+IRC.prototype.data = function(data) {
+	this.rooms()[0].addMessage(null, data);
 };
 
 IRC.prototype.output = function(roomname, nick, message) {
