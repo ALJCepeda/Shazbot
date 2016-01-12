@@ -1,3 +1,4 @@
+var Profile = require("../profile");
 var Promise = require("promise");
 var Dockerizer = require("/shared/dockerizer/dockerizer");
 
