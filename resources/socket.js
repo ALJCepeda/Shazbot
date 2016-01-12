@@ -14,6 +14,9 @@ var bootstrap_socket = function(io) {
 		var irc = new IRC();
 		var bot = new Bot(irc);
 		var slasher = new Slasher();
+
+		bot.channels = ["botwar"];
+		bot.isRegistered = true;
 		
 		bootstrap_botcmds(bot, socket);
 		bootstrap_slashercmds(slasher, bot, socket);
@@ -22,9 +25,6 @@ var bootstrap_socket = function(io) {
 		bot.irc.data = function(data) {
 			io.emit("data", data);
 		};
-
-		bot.channels = ["botwar"];
-		bot.isRegistered = true;
 	});
 };
 

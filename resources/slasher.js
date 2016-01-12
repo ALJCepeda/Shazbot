@@ -1,6 +1,7 @@
 var config = require('../config');
 var path = require("path");
-var Emitter = require("./emitter");
+
+var Emitter = require(path.join(config.dirs.root, "prototypes", "emitter"));
 var Obj = require(path.join(config.dirs.shared, "object", "obj.js"));
 
 var SlashCommander = function() {

@@ -4,9 +4,8 @@ var path = require("path");
 var config = require("../config");
 var Promise = require("promise");
 var Profile = require("./profile");
-var commands = require("./commands");
-var Emitter = require("./emitter");
 
+var Emitter = require(path.join(config.dirs.root, "prototypes", "emitter"));
 var Obj = require(path.join(config.dirs.shared, "object", "obj.js"));
 
 var Bot = function(irc) {
@@ -22,7 +21,7 @@ var Bot = function(irc) {
 	this.anonymousUse = false;
 
 	this.channels = [];
-	this.commands = commands;
+	this.commands = {};
 	this.irc = irc;
 };
 

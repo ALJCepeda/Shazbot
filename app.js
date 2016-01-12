@@ -1,38 +1,36 @@
 var _ = require("underscore");
-var express = require('express');
+var express = require("express");
 var bodyparser = require("body-parser");
 var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var http = require("http").Server(app);
+var io = require("socket.io")(http);
 var path = require("path");
-var fs = require('fs');
+var util = require("util");
+var fs = require("fs");
 
-var config = require('./config');
-var bootstrap_socket = require('./resources/socket');
+var config = require("./config");
+var bootstrap_socket = require("./resources/socket");
 
-process.stdin.resume();
-process.stdin.setEncoding('utf8');
-var util = require('util');
 
 app.use(bodyparser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 
-app.use(express.static(path.join(config.dirs.root, 'client')));
+app.use(express.static(path.join(config.dirs.root, "client")));
 
-app.get('/', function(req, res){ 
-	res.sendFile(path.join(__dirname, '/client/index.html'));
+app.get("/", function(req, res){ 
+	res.sendFile(path.join(__dirname, "/client/index.html"));
 });
 
-app.get('/lib/:name', function(req, res){
+app.get("/lib/:name", function(req, res){
 	var script = config.lib[req.params.name];
-	if( typeof script !== 'undefined' ) {
+	if( typeof script !== "undefined" ) {
 		//Remove extension from dependency name
 		var name = req.params.name;
-		name = name.substring(0, name.indexOf('.'));
+		name = name.substring(0, name.indexOf("."));
 
 		//Check if dependency is mapped somewhere in the bower directory
-		if( typeof config.libMap[name] !== 'undefined' ) {
+		if( typeof config.libMap[name] !== "undefined" ) {
 			name = config.libMap[name];
 		}
 
@@ -40,10 +38,10 @@ app.get('/lib/:name', function(req, res){
 		res.sendFile(path.join(config.dirs.bower, name, script));
 	} else {
 		//No dependency by that name
-		res.status('404').send('Not Found');
+		res.status("404").send("Not Found");
 	}
 });
 
 bootstrap_socket(io);
-//Server
-http.listen(8002, function() { console.log('listening on *:8001'); });
+
+http.listen(8002, function() { console.log("listening on *:8001"); });
