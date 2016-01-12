@@ -1,6 +1,9 @@
 var Profile = require("../profile");
 var Promise = require("promise");
-var Dockerizer = require("/shared/dockerizer/dockerizer");
+var path = require("path");
+
+var config = require("../../config");
+var Dockerizer = require(path.join(config.dirs.shared, "dockerizer", "dockerizer"));
 
 bootstrap_botcmds = function(bot, socket) {
 	bot.on("joined", function(entity, args) {
@@ -69,7 +72,7 @@ bootstrap_botcmds = function(bot, socket) {
 					var result = data.stderr !== "" ? data.stderr : data.stdout;
 
 					if(data.stderr !== "") {
-						result = /^PHP (.*) in .*\n/g.exec(result);
+						result = /^PHP (.*) in .*$/g.exec(result);
 						result.shift();
 						result = result.join("\n");
 
@@ -89,10 +92,12 @@ bootstrap_botcmds = function(bot, socket) {
 
 				docker.stopAfter = 5000;
 				return docker.execute(code, "nodejs", "latest").then(function(data) {
+					var result = "";
+
 					if(data.stderr !== "") {
 						var error = data.stderr;
 
-						var parts = error.split("\n").slice(1, 4)
+						var parts = error.split(/\\n|<\/br>/g).slice(1, 4)
 						var before = parts[0].length;
 						parts[0] = parts[0].replace(/.*{\s/, ""); //Error line with weird func call
 
@@ -104,11 +109,13 @@ bootstrap_botcmds = function(bot, socket) {
 								return prefix + " " + part;
 							});
 						}
-
-						return Promise.resolve(parts);
+						
+						result = parts;
+					} else {
+						result = data.stdout.replace("\n", "");
 					}
 				
-					return Promise.resolve(data.stdout);
+					return Promise.resolve(result);
 				});
 			}
 		}

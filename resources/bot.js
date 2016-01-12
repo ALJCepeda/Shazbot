@@ -136,7 +136,13 @@ Bot.prototype.canRespond = function(info) {
 	return false;
 };
 
+function uncurlQuotes(str) {
+	var result = str.replace(/“|”/g, '"').replace(/‘|’/g, "'");
+	return result;
+}
+
 Bot.prototype.parse = function(str) {
+	str = uncurlQuotes(str);
 	var info = this.split(str);
 	var promise = Promise.resolve("");
 
@@ -189,13 +195,7 @@ Bot.prototype.PRIVMSG = function(entity, args) {
 	}
 };
 
-function uncurlQuotes(str) {
-	var result = str.replace(/“|”/g, '"').replace(/‘|’/g, "'");
-	return result;
-}
-
 Bot.prototype.respondTo = function(target, message) {
-	var message = uncurlQuotes(message);
 	var promise = this.parse(message) || "";
 
 	promise.then(this.outputTo(target)).catch(this.error);

@@ -37,39 +37,37 @@ describe("Profile", function() {
 			}).catch(done);
 		});
 
-		xit("php", function(done) {
-			var bot = new Bot();
-
+		it("php", function(done) {
 			bot.parse("shaz php $foo = 'bar'; echo $foo;").then(function(result) {
 				result.should.equal("bar");
 				done();
 			}).catch(done);
 		});
 
-		xit("php error", function(done) {
-			var bot = new Bot();
-
+		it("php error", function(done) {
 			bot.parse("shaz php echo $foo;").then(function(result) {
 				result.should.equal("Notice:  Undefined variable: foo");
 				done();
 			}).catch(done);
 		});
 
-		xit("nodejs curly quotes", function(done) {
-			var bot = new Bot();
-
+		it("nodejs curly quotes", function(done) {
 			bot.parse("shaz nodejs var foo = “bar”; console.log(foo);").then(function(result) {
 				result.should.equal("bar");
 				done();
 			}).catch(done);
 		});
 
-		xit("nodejs error", function(done) {
-			var bot = new Bot();
-
+		it("nodejs error", function(done) {
 			bot.parse('shaz nodejs var foo = bar"; consol.log("Hello"); console.log(foo);').then(function(result) {
-				console.log(result);
-			});
+				result.should.eql([
+					"var foo = bar\"; consol.",
+					"             ^^^^^^^^^^",
+					"SyntaxError: Unexpected string"
+				]);
+
+				done();
+			}).catch(done);
 		});
 	});
 });
