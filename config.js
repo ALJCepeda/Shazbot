@@ -6,7 +6,8 @@ module.exports = {
 	port: (global.DEV === true) ? 8802 : 8002,
 	dirs: {
 		root: (global.ONLINE === true ) ? '/var/www/shazbot' : '/shared/shazbot',
-		bower: '/shared/bower_components'
+		bower: '/shared/bower_components',
+		shared: '/shared'
 	},
 	lib: {
 		'requirejs.js' : 'require.js',

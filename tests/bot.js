@@ -32,7 +32,7 @@ describe("Profile", function() {
 			});
 		});
 
-		it("lgt with prefix", function(done) {
+		xit("lgt with prefix", function(done) {
 			var bot = new Bot();
 			
 			bot.parse("shaz @Literphor lgt Is pluto a planet?").then(function(result) {
@@ -41,7 +41,7 @@ describe("Profile", function() {
 			});
 		});
 
-		it("php", function(done) {
+		xit("php", function(done) {
 			var bot = new Bot();
 
 			bot.parse("shaz php $foo = 'bar'; echo $foo;").then(function(result) {
@@ -50,7 +50,7 @@ describe("Profile", function() {
 			}).catch(done);
 		});
 
-		it("php error", function(done) {
+		xit("php error", function(done) {
 			var bot = new Bot();
 
 			bot.parse("shaz php echo $foo;").then(function(result) {
@@ -59,7 +59,7 @@ describe("Profile", function() {
 			}).catch(done);
 		});
 
-		it("nodejs curly quotes", function(done) {
+		xit("nodejs curly quotes", function(done) {
 			var bot = new Bot();
 
 			bot.parse("shaz nodejs var foo = “bar”; console.log(foo);").then(function(result) {
@@ -68,7 +68,7 @@ describe("Profile", function() {
 			}).catch(done);
 		});
 
-		it("nodejs error", function(done) {
+		xit("nodejs error", function(done) {
 			var bot = new Bot();
 
 			bot.parse('shaz nodejs var foo = bar"; consol.log("Hello"); console.log(foo);').then(function(result) {

@@ -1,8 +1,13 @@
 require("../prototypes/string");
 var _ = require("underscore");
+var path = require("path");
+var config = require("../config");
 var Promise = require("promise");
 var Profile = require("./profile");
 var commands = require("./commands");
+var Emitter = require("./emitter");
+
+var Obj = require(path.join(config.dirs.shared, "object", "obj.js"));
 
 var Bot = function(irc) {
 	this.nick = "";
@@ -20,21 +25,7 @@ var Bot = function(irc) {
 	this.irc = irc;
 };
 
-Bot.prototype.listen = function(cmd, cb, once) {
-	if( _.isUndefined(this.listeners[cmd]) ) {
-		this.listeners[cmd] = [];
-	}
-
-	this.listeners[cmd].push([cb, once]);
-};
-
-Bot.prototype.on = function(cmd, cb) {
-	this.listen(cmd, cb, false);
-};
-
-Bot.prototype.once = function(cmd, cb) {
-	this.listen(cmd, cb, true);
-};
+Obj.assign(Bot.prototype, Emitter.prototype);
 
 Bot.prototype.split = function(str) {
 	var isValid = false;
@@ -93,9 +84,9 @@ Bot.prototype.parse = function(str) {
 	var info = this.split(str);
 	var promise = Promise.resolve("");
 
-	if(info.valid === true && (isLocal === true || this.isTargeted(info.target) === true)) {
+	if(info.valid === true && this.isTargeted(info.target) === true) {
 		if(this.hasCommand(info.cmd) === true) {
-			var response = bot.commandFor(info.cmd);
+			var response = this.commandFor(info.cmd);
 			promise = response.action(info.args, info.prefix);
 		} else {
 			promise = Promise.resolve("Unrecognized command: " + info.cmd);
@@ -103,17 +94,6 @@ Bot.prototype.parse = function(str) {
 	}
 
 	return promise;
-};
-
-Bot.prototype.emit = function(cmd, entity, data) {
-	var listeners = this.listeners[cmd];
-
-	if(!_.isUndefined(listeners)) {
-		this.listeners[cmd] = listeners.filter(function(entry) {
-			entry[0](entity, data);
-			return entry[1] === false;
-		});
-	}
 };
 
 Bot.prototype.connect = function(nick, password, server, port, complete) {
