@@ -113,7 +113,7 @@ Bot.prototype.split = function(str) {
 };
 
 Bot.prototype.isTargeted = function(target) {
-	if(target === "shaz") {
+	if(target === "!>") {
 		return true;
 	}
 
