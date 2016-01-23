@@ -79,13 +79,9 @@ bootstrap_botcmds = function(bot, socket) {
 						result = /^PHP (.*) in .*$/g.exec(result);
 						result.shift();
 						result = result.join("\n");
-
-						if(prefix !== "") {
-							result = prefix + " " + result;
-						}
 					}
 					
-					return Promise.resolve(result);
+					return Promise.resolve(prefix + result);
 				});
 			}
 		},

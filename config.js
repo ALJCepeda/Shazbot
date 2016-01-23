@@ -3,7 +3,7 @@ global.DEV = (process.argv.indexOf('--dev') !== -1) ? true : false;
 
 module.exports = {
 	name: 'shazbot',
-	port: (global.DEV === true) ? 8802 : 8002,
+	port: (global.DEV === true) ? 8803 : 8003,
 	dirs: {
 		root: (global.ONLINE === true ) ? '/var/www/shazbot' : '/shared/shazbot',
 		bower: '/shared/bower_components',

@@ -1,6 +1,5 @@
 var Bot = require("./bot");
 var IRC = require("./irc");
-var Profile = require("./profile");
 var Slasher = require("./slasher");
 
 var bootstrap_botcmds = require("./commands/bot");
@@ -16,7 +15,6 @@ var bootstrap_socket = function(io) {
 		var slasher = new Slasher();
 
 		bot.channels = ["botwar"];
-		bot.isRegistered = true;
 		
 		bootstrap_botcmds(bot, socket);
 		bootstrap_slashercmds(slasher, bot, socket);

@@ -9,8 +9,6 @@ var util = require("util");
 var fs = require("fs");
 
 var config = require("./config");
-var bootstrap_socket = require("./resources/socket");
-
 
 app.use(bodyparser.urlencoded({     // to support URL-encoded bodies
   extended: true
@@ -42,6 +40,7 @@ app.get("/lib/:name", function(req, res){
 	}
 });
 
+var bootstrap_socket = require("./resources/socket");
 bootstrap_socket(io);
 
-http.listen(8002, function() { console.log("listening on *:8001"); });
+http.listen(config.port, function() { console.log("listening on *:" + config.port); });

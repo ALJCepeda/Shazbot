@@ -2,20 +2,20 @@ var config = require('../config');
 var path = require("path");
 
 var Emitter = require(path.join(config.dirs.root, "prototypes", "emitter"));
-var Obj = require(path.join(config.dirs.shared, "object", "obj.js"));
+var Obj = require(path.join(config.dirs.shared, "object", "obj"));
 
-var SlashCommander = function() {
-	Obj.assign(this, new Emitter())
+var Slasher = function() {
+	Obj.assign(this, new Emitter());
 };
 
-Obj.assign(SlashCommander.prototype, Emitter.prototype, true);
+Obj.assign(Slasher.prototype, Emitter.prototype, true);
 
-SlashCommander.prototype.onNone = function() { };
-SlashCommander.prototype.isValid = function(message) { 
+Slasher.prototype.onNone = function() { };
+Slasher.prototype.isValid = function(message) { 
 	return message[0] === "/";
 };
 
-SlashCommander.prototype.parse = function(message) {
+Slasher.prototype.parse = function(message) {
 	if(this.isValid(message)) {
 		var args = message.split(" ");
 
@@ -33,4 +33,4 @@ SlashCommander.prototype.parse = function(message) {
 	return false;
 };
 
-module.exports = SlashCommander;
+module.exports = Slasher;
