@@ -7,7 +7,7 @@ var bootstrap_slashercmds = require("./commands/slash");
 var bootstrap_socketcmds = require("./commands/socket");
 
 var bootstrap_socket = function(io) {
-	io.on('connection', function(socket) {
+	io.on("connection", function(socket) {
 		console.log("User connected..");
 
 		var irc = new IRC();
@@ -23,6 +23,12 @@ var bootstrap_socket = function(io) {
 		bot.irc.data = function(data) {
 			io.emit("data", data);
 		};
+
+		socket.on("disconnect", function() {
+			if(bot.isConnected === true) {
+				bot.disconnect();
+			}
+		});
 	});
 };
 

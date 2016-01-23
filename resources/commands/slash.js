@@ -21,6 +21,7 @@ var bootstrap_slashercmds = function(slasher, bot, socket) {
 				}
 
 				bot.connect(nick, password, server, 6667, function() {
+					console.log("IRC connection started... ");
 					socket.emit("connected");
 				});
 			} catch(exception) {

@@ -16,7 +16,6 @@ var Bot = function(irc) {
 	this.info = "NodeJS Bot";
 	this.password = "";
 
-	this.isConnected = false;
 	this.isRegistered = false;
 	this.anonymousUse = false;
 
@@ -25,7 +24,17 @@ var Bot = function(irc) {
 	this.irc = irc;
 };
 
+Bot.prototype = {
+	get isConnected () {
+		return this.irc.isConnected;
+	}
+}
+
 Obj.assign(Bot.prototype, Emitter.prototype, true);
+
+Bot.prototype.disconnect = function() {
+	this.irc.disconnect();
+}
 
 Bot.prototype.connect = function(nick, password, server, port, complete) {
 	var self = this;
@@ -81,8 +90,6 @@ Bot.prototype.connect = function(nick, password, server, port, complete) {
 				return true;
 			});
 		}
-
-		self.isConnected = true;
 		complete();
 	});
 };
