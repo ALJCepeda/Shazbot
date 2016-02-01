@@ -15,14 +15,17 @@ var IRC = function() {
 	});
 
 	var container = document.getElementById("content_container");
-	container.onscroll = function() {
-		var scrollOffset = this.scrollHeight - this.clientHeight;
-		
-		if(this.scrollTop === scrollOffset) {
+	var set_autoScroll = throttle(function() {
+		var scrollOffset = container.scrollHeight - container.clientHeight;
+	
+		if(container.scrollTop === scrollOffset) {
 			self.autoScroll = true;
 		} else {
 			self.autoScroll = false;
 		}
+	}, 500);
+	container.onscroll = function() {
+		set_autoScroll();
 	};
 };
 
@@ -88,4 +91,18 @@ IRC.prototype.tryScroll = function() {
 	if(this.autoScroll === true) {
 		document.getElementById("bottom").scrollIntoView();
 	}
+}
+
+function throttle (callback, limit) {
+    var wait = false;                  // Initially, we're not waiting
+    return function () {               // We return a throttled function
+        if (!wait) {                   // If we're not waiting
+            callback.call();           // Execute users function
+            wait = true;               // Prevent future invocations
+
+            setTimeout(function () {   // After a period of time
+                wait = false;          // And allow future invocations
+            }, limit);
+        }
+    }
 }
