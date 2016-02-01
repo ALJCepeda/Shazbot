@@ -1,0 +1,23 @@
+{
+  "name": "Shazbot",
+  "description": "IRC/Bot client combo",
+  "main": "app.js",
+  "authors": [
+    "Alfred Cepeda <AlfredJCepeda@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/ALJCepeda/Shazbot",
+  "moduleType": [],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "knockout": "^3.4.0",
+    "underscore": "^1.8.3"
+  }
+}
