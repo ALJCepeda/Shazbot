@@ -13,7 +13,12 @@ bootstrap_botcmds = function(bot, socket) {
 
 	bot.on("privmsg", function(entity, args) {
 		var profile = new Profile(entity);
-		socket.emit("output", { room:args[0], from:profile.nick, message:args[1] });
+
+		if(args[0] === bot.nick) {
+			socket.emit("whisper", { from:profile.nick, message:args[1] });
+		} else {
+			socket.emit("output", { room:args[0], from:profile.nick, message:args[1] });
+		}
 	});
 
 	bot.on("nicknames", function(entity, args) {

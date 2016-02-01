@@ -1,3 +1,7 @@
+/*
+	Browser side command handler
+*/
+
 var config = require('../config');
 var path = require("path");
 

@@ -87,6 +87,10 @@ socket.on("output", function(data) {
 	irc.output(data.room, data.from, data.message);
 });
 
+socket.on("whisper", function(data) {
+	irc.whisper(data.from, data.message);
+});
+
 socket.on("addRoom", function(data) {
 	irc.addRoom(data.room);
 });

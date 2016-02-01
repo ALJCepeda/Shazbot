@@ -78,6 +78,7 @@ IRC.prototype.handle = function(data) {
 	var i, info;
 
 	info = /^(?:[:](\S+) )?(\S+)(?: (?!:)(.+?))?(?: [:](.+))?$/.exec(data);
+	console.log(data);
 	if (info) {
 		var entity = info[1];
 		var cmd = info[2];

@@ -8,8 +8,6 @@ var IRC = function() {
 	this.addRoom("data");
 	this.selectRoom(0);
 
-	this.bottom = 
-
 	this.selectedRoom.subscribe(function(value) {
 		self.tryScroll();
 	});
@@ -78,8 +76,16 @@ IRC.prototype.data = function(data) {
 	this.output("data", null, data);
 };
 
+IRC.prototype.whisper = function(nick, message) {
+	if(this.hasRoom(nick) === false) {
+		this.addRoom(nick);
+	}
+
+	this.output(nick, nick, message);
+}
+
 IRC.prototype.output = function(roomname, nick, message) {
-	var room = this.roomIndex[roomname].room;
+	var room = this.getRoom(roomname);
 	room.addMessage(nick, message);
 
 	if(this.selectedRoom().name === roomname) {
