@@ -22,7 +22,7 @@ app.get("/", function(req, res){
 
 app.get("/lib/:name", function(req, res){
 	var script = config.lib[req.params.name];
-	if( typeof script !== "undefined" ) {
+	if(!_.isUndefined(script)) {
 		//Remove extension from dependency name
 		var name = req.params.name;
 		name = name.substring(0, name.indexOf("."));

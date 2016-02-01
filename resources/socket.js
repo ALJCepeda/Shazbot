@@ -21,7 +21,7 @@ var bootstrap_socket = function(io) {
 		bootstrap_socketcmds(socket, bot, slasher);
 
 		bot.irc.data = function(data) {
-			io.emit("data", data);
+			socket.emit("data", data);
 		};
 
 		socket.on("disconnect", function() {
