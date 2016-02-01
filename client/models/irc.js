@@ -3,9 +3,27 @@ var IRC = function() {
 	this.roomIndex = {};
 	this.rooms = ko.observableArray([]);
 	this.selectedRoom = ko.observable({});
+	this.autoScroll = true;
 
 	this.addRoom("data");
 	this.selectRoom(0);
+
+	this.bottom = 
+
+	this.selectedRoom.subscribe(function(value) {
+		self.tryScroll();
+	});
+
+	var container = document.getElementById("content_container");
+	container.onscroll = function() {
+		var scrollOffset = this.scrollHeight - this.clientHeight;
+		
+		if(this.scrollTop === scrollOffset) {
+			self.autoScroll = true;
+		} else {
+			self.autoScroll = false;
+		}
+	};
 };
 
 IRC.prototype.selectRoom = function(index) {
@@ -54,10 +72,20 @@ IRC.prototype.leaveRoom = function(name) {
 };
 
 IRC.prototype.data = function(data) {
-	this.rooms()[0].addMessage(null, data);
+	this.output("data", null, data);
 };
 
 IRC.prototype.output = function(roomname, nick, message) {
 	var room = this.roomIndex[roomname].room;
 	room.addMessage(nick, message);
+
+	if(this.selectedRoom().name === roomname) {
+		this.tryScroll();
+	}
 };
+
+IRC.prototype.tryScroll = function() {
+	if(this.autoScroll === true) {
+		document.getElementById("bottom").scrollIntoView();
+	}
+}
