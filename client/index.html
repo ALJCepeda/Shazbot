@@ -41,6 +41,10 @@
 
 				<span data-bind="text: name"></span>
 			</button>
+			
+			<ul data-bind="foreach:users, attr:{ id:name + '_users' }">
+				<li><span data-bind="text: $data"></span></li>
+			</ul>
 		</div>
 
 		<button id="connect" style="height:5%; width:100%;">Submit</button>
@@ -92,11 +96,24 @@ socket.on("whisper", function(data) {
 });
 
 socket.on("addRoom", function(data) {
+	debugger;
 	irc.addRoom(data.room);
 });
 
 socket.on("leaveRoom", function(data) {
 	irc.leaveRoom(data.room);
+});
+
+socket.on("nicknames", function(data) {
+	irc.nicknames(data.room, data.nicknames);
+});
+
+socket.on("userJoined", function(data) {
+	irc.userJoined(data.room, data.nick);
+});
+
+socket.on("userLeft", function(data) {
+	irc.userLeft(data.room, data.nick);
 });
 
 function submitMessage() {

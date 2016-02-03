@@ -7,8 +7,13 @@ var Dockerizer = require(path.join(config.dirs.shared, "dockerizer", "dockerizer
 
 bootstrap_botcmds = function(bot, socket) {
 	bot.on("joined", function(entity, args) {
-		var info = args[0].split(" ");
-		socket.emit("addRoom", { room:info[1] });
+		var profile = new Profile(entity);
+
+		if(profile.nick === bot.nick) {
+			socket.emit("addRoom", { room:args[0] });
+		} else {
+			socket.emit("userJoined", { nick:profile.nick, room:args[0] });
+		}
 	});
 
 	bot.on("privmsg", function(entity, args) {
@@ -23,12 +28,13 @@ bootstrap_botcmds = function(bot, socket) {
 
 	bot.on("nicknames", function(entity, args) {
 		if(typeof args[1] !== "undefined") {
-			var ent = entity.split(" = ");
+			var ent = args[0].split(" = ");
 			var user = ent[0];
 			var room = ent[1];
 			var nicks = args[1].split(" ");
 
-			socket.emit("nicknames", { room:ent[1], nicknames:nicks });
+			var data = { room:ent[1], nicknames:nicks };
+			socket.emit("nicknames", data) ;
 		}
 
 		socket.emit("data", args.join(" "));
