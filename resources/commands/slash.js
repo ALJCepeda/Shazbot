@@ -30,14 +30,11 @@ var bootstrap_slashercmds = function(slasher, bot, socket) {
 		}
 	});
 
-	function disconnect(args) {
+	slasher.on("disconnect", function(args) {
 		if(bot.isConnected === true) {
 			bot.disconnect();
 		}
-	}
-
-	slasher.on("disconnect", disconnect);
-	slasher.on("exit", disconnect);
+	});
 };
 
 module.exports = bootstrap_slashercmds;

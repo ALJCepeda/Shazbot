@@ -40,7 +40,12 @@ var IRC = function() {
 */
 IRC.prototype.selectRoom = function(index) {
 	var room = this.rooms()[index];
-	this.selectedRoom(room);
+
+	if(this.selectedRoom() === room) {
+		room.showUsers(!room.showUsers());
+	} else {
+		this.selectedRoom(room);
+	}
 };
 
 /*
@@ -48,17 +53,19 @@ IRC.prototype.selectRoom = function(index) {
 */
 IRC.prototype.joinRoom = function(name) {
 	var self = this;
-	
+	var length = this.rooms().length;
+
 	var room = new Chatroom(name, {
 		shouldSelect:function() {
 			self.selectRoom(length);
+			return true;
 		}, isVisible:function() {
 			return self.selectedRoom().name === name;
 		}
 	});
 
 	this.rooms.push(room);
-	this.roomsIndex[name] = this.rooms().length - 1;
+	this.roomsIndex[name] = length;
 
 	return room;
 };

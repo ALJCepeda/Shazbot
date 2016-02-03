@@ -24,8 +24,33 @@
       	body { font: 13px Helvetica, Arial; overflow:hidden; }
       	#inputBox { border: 1; padding: 10px; width: 90%; margin-right: .5%; }
       	#messages { list-style-type: none; margin: 0; padding: 0; }
-      	#messages li { padding: 5px 10px; }
       	#messages li:nth-child(odd) { background: #eee; }
+      	ul li { padding: 5px 10px; }
+
+      	.navbar {
+      		position:absolute;
+      		width:150px;
+      		left:0;
+      		top:0;
+      		bottom:0;
+      		border-right:1px solid black;
+      		background:black;
+      	}
+
+      	.navbar button {
+      		height:30px;
+      		width:100%;
+      	}
+
+      	.userList {
+      		max-height: 35%;
+      		overflow-y: auto;
+      		overflow-x: none;
+      	}
+      	
+      	.userList ul {
+      		color:white;
+      	}
 	</style>
 
 	<style>
@@ -34,20 +59,22 @@
 </head>
 
 <body id="bodyContainer">
-	<div id="navbar" class="col-nw m-start c-center" style="width:150px; height:100%; position:absolute; left:0; top:0; border-right:1px solid black; background:black;">
+	<div class="col-nw m-start c-center navbar">
 		<div class="col-nw m-start c-stretch" style="width:100%; height:95%;" data-bind="foreach: rooms">
-			<button style="height:5%; width:100%" data-bind="click: shouldSelect">
+			<button data-bind="click: shouldSelect">
 				<span data-bind="text: unread, visible: unread() > 0" style="color:red" ></span>
 
 				<span data-bind="text: name"></span>
 			</button>
-			
-			<ul data-bind="foreach:users, attr:{ id:name + '_users' }">
-				<li><span data-bind="text: $data"></span></li>
-			</ul>
+
+			<div class="userList" data-bind="visible:isVisible() && showUsers()">
+				<ul data-bind="foreach:users, attr:{ id:name + '_users' }">
+					<li><span data-bind="text: $data"></span></li>
+				</ul>
+			</div>
 		</div>
 
-		<button id="connect" style="height:5%; width:100%;">Submit</button>
+		<button id="submit">Submit</button>
 	</div>
 
 	<div id="content_container" style="position:absolute; left:150px; right:0; top:0; bottom:38px; overflow:auto;" data-bind="foreach: rooms">
@@ -61,7 +88,7 @@
 	</div>
 
 
-	<input id="inputBox" type="text" style="position:absolute; left:150px; right:0; bottom:0; width:100%;" />
+	<input id="inputBox" type="text" style="position:absolute; left:150px; right:0; bottom:0;" />
 </body>
 
 <script>
@@ -128,6 +155,10 @@ function submitMessage() {
 
 		inputBox.value = "";
 	}
+}
+
+document.getElementById("submit").onclick = function() {
+	submitMessage();
 }
 
 document.onkeyup = function() {

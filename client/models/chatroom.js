@@ -1,8 +1,3 @@
-var ChatroomEntry = function(nick, role) {
-	this.nick = nick;
-	this.role = role || "user";
-}
-
 var Chatroom = function(name, options) {
 	var self = this;
 	options = options || {};
@@ -11,6 +6,7 @@ var Chatroom = function(name, options) {
 	this.users = ko.observableArray([]);
 	this.messages = ko.observableArray([]);
 	this.unread = ko.observable(0);
+	this.showUsers = ko.observable(false);
 
 	if(options.shouldSelect) {
 		this.shouldSelect = options.shouldSelect.bind(this);
