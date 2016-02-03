@@ -10,9 +10,19 @@ bootstrap_botcmds = function(bot, socket) {
 		var profile = new Profile(entity);
 
 		if(profile.nick === bot.nick) {
-			socket.emit("addRoom", { room:args[0] });
+			socket.emit("joinRoom", { room:args[0] });
 		} else {
 			socket.emit("userJoined", { nick:profile.nick, room:args[0] });
+		}
+	});
+
+	bot.on("parted", function(entity, args) {
+		var profile = new Profile(entity);
+
+		if(profile.nick === bot.nick) {
+			socket.emit("leaveRoom", { room:args[0] });
+		} else {
+			socket.emit("userLeft", { nick:profile.nick, room:args[0] });
 		}
 	});
 
@@ -27,17 +37,13 @@ bootstrap_botcmds = function(bot, socket) {
 	});
 
 	bot.on("nicknames", function(entity, args) {
-		if(typeof args[1] !== "undefined") {
-			var ent = args[0].split(" = ");
-			var user = ent[0];
-			var room = ent[1];
-			var nicks = args[1].split(" ");
+		var ent = args[0].split(" = ");
+		var user = ent[0];
+		var room = ent[1];
+		var nicks = args[1].split(" ");
 
-			var data = { room:ent[1], nicknames:nicks };
-			socket.emit("nicknames", data) ;
-		}
-
-		socket.emit("data", args.join(" "));
+		var data = { room:ent[1], nicknames:nicks };
+		socket.emit("nicknames", data) ;
 	});
 
 	bot.on("said", function(target, message) {

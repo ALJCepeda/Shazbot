@@ -7,7 +7,7 @@ var IRC = function() {
 	this.selectedRoom = ko.observable({});
 	this.autoScroll = true;
 
-	this.addRoom("data");
+	this.joinRoom("data");
 	this.selectRoom(0);
 
 	this.selectedRoom.subscribe(function(value) {
@@ -46,7 +46,7 @@ IRC.prototype.selectRoom = function(index) {
 /*
 	Creates and adds empty Chatroom object with name
 */
-IRC.prototype.addRoom = function(name) {
+IRC.prototype.joinRoom = function(name) {
 	var self = this;
 	
 	var room = new Chatroom(name, {
@@ -129,7 +129,7 @@ IRC.prototype.data = function(data) {
 
 IRC.prototype.whisper = function(nick, message) {
 	if(this.hasRoom(nick) === false) {
-		this.addRoom(nick);
+		this.joinRoom(nick);
 	}
 
 	this.output(nick, nick, message);

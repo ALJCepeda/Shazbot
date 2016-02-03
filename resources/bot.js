@@ -66,6 +66,10 @@ Bot.prototype.connect = function(nick, password, server, port, complete) {
 			self.emit("joined", entity, args);
 		});
 
+		irc.on("PART", function(entity, args) {
+			self.emit("parted", entity, args);
+		});
+		
 		if(self.isRegistered === true) {
 			irc.on("NOTICE", function(entity, args) {
 				var profile = new Profile(entity);

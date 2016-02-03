@@ -95,9 +95,8 @@ socket.on("whisper", function(data) {
 	irc.whisper(data.from, data.message);
 });
 
-socket.on("addRoom", function(data) {
-	debugger;
-	irc.addRoom(data.room);
+socket.on("joinRoom", function(data) {
+	irc.joinRoom(data.room);
 });
 
 socket.on("leaveRoom", function(data) {
