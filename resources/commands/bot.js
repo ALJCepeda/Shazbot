@@ -32,7 +32,10 @@ bootstrap_botcmds = function(bot, socket) {
 		if(args[0] === bot.nick) {
 			socket.emit("whisper", { from:profile.nick, message:args[1] });
 		} else {
-			socket.emit("output", { room:args[0], from:profile.nick, message:args[1] });
+			var message = args[1];
+			var highlighted = message.toLowerCase().indexOf(bot.nick.toLowerCase()) !== -1;
+
+			socket.emit("output", { room:args[0], from:profile.nick, message:message, highlighted:highlighted });
 		}
 	});
 

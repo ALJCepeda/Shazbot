@@ -142,10 +142,10 @@ IRC.prototype.whisper = function(nick, message) {
 	this.output(nick, nick, message);
 };
 
-IRC.prototype.output = function(roomname, nick, msg) {
+IRC.prototype.output = function(roomname, nick, msg, highlight) {
 	var room = this.getRoom(roomname);
 
-	var message = new Message(nick, msg);
+	var message = new Message(nick, msg, highlight || false);
 	room.addMessage(message);
 
 	if(this.selectedRoom().name === roomname) {

@@ -51,6 +51,10 @@
       	.userList ul {
       		color:white;
       	}
+
+      	.highlight {
+      		background:beige;
+      	}
 	</style>
 
 	<style>
@@ -80,7 +84,7 @@
 	<div id="content_container" style="position:absolute; left:150px; right:0; top:0; bottom:38px; overflow:auto;" data-bind="foreach: rooms">
 		<div data-bind="visible:isVisible">
 			<ul id="messages" data-bind="foreach:messages">
-				<li><span data-bind="text:toString()"></span></li>
+				<li data-bind="style:{ background: highlight ? 'beige':''  }"><span data-bind="text:toString()"></span></li>
 			</ul>
 		</div>
 
@@ -115,7 +119,7 @@ socket.on("data", function(message) {
 });
 
 socket.on("output", function(data) {
-	irc.output(data.room, data.from, data.message);
+	irc.output(data.room, data.from, data.message, data.highlighted);
 });
 
 socket.on("whisper", function(data) {

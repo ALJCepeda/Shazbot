@@ -1,6 +1,7 @@
-var Message = function(nick, message) {
+var Message = function(nick, message, highlight) {
 	this.nick = nick;
 	this.message = message;
+	this.highlight = highlight;
 };
 
 Message.prototype.toString = function() {
