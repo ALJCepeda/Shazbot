@@ -36,13 +36,18 @@ var IRC = function() {
 	};
 
 	this.doLeaveRoom = function(room) {
-		self.shouldLeaveRoom(room.name);
+		if(room.isWhisper === true) {
+			self.removeRoom(room);
+		} else {
+			self.shouldLeaveRoom(room.name);
+		}
 	};
 
 	this.doWhisper = function(nick) {
 		if(self.hasRoom(nick) === false) {
 			var nick = self.strip(nick);
-			self.joinRoom(nick);
+			var room = self.joinRoom(nick);
+			room.isWhisper = true;
 		}
 	};
 };
@@ -122,10 +127,13 @@ IRC.prototype.getRoom = function(name) {
 IRC.prototype.leaveRoom = function(name){
 	if(this.hasRoom(name) === true) {
 		var room = this.getRoom(name);
-
-		this.rooms.remove(room);
-		delete this.roomsIndex[room.name];
+		this.removeRoom(room);
 	}
+};
+
+IRC.prototype.removeRoom = function(room) {
+	this.rooms.remove(room);
+	delete this.roomsIndex[room.name];
 };
 
 /*

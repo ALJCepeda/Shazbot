@@ -9,6 +9,7 @@ var Chatroom = function(name, options) {
 	this.unread = ko.observable(0);
 	this.showUsers = ko.observable(false);
 	this.showClose = ko.observable(true);
+	this.isWhisper = false;
 
 	if(options.shouldSelect) {
 		this.shouldSelect = options.shouldSelect.bind(this);
