@@ -14,7 +14,11 @@ bootstrap_socketcmds = function(socket, bot, slasher) {
 
 	socket.on("shouldLeaveRoom", function(name) {
 		bot.leave(name);
-	})
+	});
+
+	socket.on("shouldJoinRoom", function(name) {
+		bot.join(name);
+	});
 };
 
 module.exports = bootstrap_socketcmds;

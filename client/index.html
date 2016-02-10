@@ -76,10 +76,10 @@
 		</button>
 
 		<div class="userList" data-bind="visible:isVisible() && showUsers()">
-			<ul data-bind="foreach:users, attr:{ id:name + '_users' }">
-				<li data-bind="click: $parent.selectUser">
+			<ul data-bind="foreach:users">
+				<li>
 					<span data-bind="text: $data"></span>
-					<span class="glyphicon glyphicon-comment pull-right" aria-hidden="true" data-bind="click:$parent.whisper, clickBubble:false"></span>
+					<span class="glyphicon glyphicon-comment pull-right" aria-hidden="true" data-bind="click:$root.doWhisper, clickBubble:false"></span>
 				</li>
 			</ul>
 		</div>
@@ -133,7 +133,8 @@ socket.on("whisper", function(data) {
 });
 
 socket.on("joinRoom", function(data) {
-	irc.joinRoom(data.room);
+	var room = irc.joinRoom(data.room);
+	irc.selectedRoom(room);
 });
 
 socket.on("leaveRoom", function(data) {
@@ -154,6 +155,10 @@ socket.on("userLeft", function(data) {
 
 irc.shouldLeaveRoom = function(name) {
 	socket.emit("shouldLeaveRoom", name);
+};
+
+irc.shouldJoinRoom = function(channel) {
+	socket.emit("shouldJoinRoom", channel);
 };
 
 irc.userJoined("data", "TestUser");

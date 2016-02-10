@@ -22,10 +22,6 @@ var Chatroom = function(name, options) {
 			}
 		});
 	}
-
-	this.whisper = function(nick) {
-		console.log("Should whisper " + nick);
-	};
 };
 
 Chatroom.prototype.addUser = function(nick, role) {

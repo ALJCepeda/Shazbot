@@ -233,19 +233,21 @@ Bot.prototype.identify = function(password) {
 	this.irc.raw("PRIVMSG NickServ :IDENTIFY " +password, true);
 };
 
-Bot.prototype.join = function(channel) {
-	if(channel.indexOf("#") === 0) {
-		channel = channel.substring(1);
+Bot.prototype.strip = function(word) {
+	if(["#","@"].indexOf(word[0]) !== -1) {
+		return word.substring(1);
 	}
-	
+
+	return word;
+};
+
+Bot.prototype.join = function(channel) {
+	channel = this.strip(channel);
 	this.irc.raw("JOIN #{0}".supplant([channel]));
 };
 
 Bot.prototype.leave = function(channel) {
-	if(channel.indexOf("#") === 0) {
-		channel = channel.substring(1);
-	}
-
+	channel = this.strip(channel);
 	this.irc.raw("PART #{0}".supplant([channel]));
 };
 

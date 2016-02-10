@@ -9,8 +9,7 @@ var IRC = function() {
 
 	var room = this.joinRoom("data");
 	room.showClose(false);
-	
-	this.selectRoom(0);
+	this.selectRoom("data");
 
 	this.selectedRoom.subscribe(function(value) {
 		self.tryScroll();
@@ -39,13 +38,28 @@ var IRC = function() {
 	this.doLeaveRoom = function(room) {
 		self.shouldLeaveRoom(room.name);
 	};
+
+	this.doWhisper = function(nick) {
+		if(self.hasRoom(nick) === false) {
+			var nick = self.strip(nick);
+			self.joinRoom(nick);
+		}
+	};
+};
+
+IRC.prototype.strip = function(word) {
+	if(["#","@"].indexOf(word[0]) !== -1) {
+		return word.substring(1);
+	}
+
+	return word;
 };
 
 /*
 	Selects room at index
 */
-IRC.prototype.selectRoom = function(index) {
-	var room = this.rooms()[index];
+IRC.prototype.selectRoom = function(name) {
+	var room = this.getRoom(name);
 
 	if(this.selectedRoom() === room) {
 		room.showUsers(!room.showUsers());
@@ -58,12 +72,16 @@ IRC.prototype.selectRoom = function(index) {
 	Creates and adds empty Chatroom object with name
 */
 IRC.prototype.joinRoom = function(name) {
+	if(this.hasRoom(name)) {
+		return this.getRoom(name);
+	}
+
 	var self = this;
 	var length = this.rooms().length;
 
 	var room = new Chatroom(name, {
 		shouldSelect:function() {
-			self.selectRoom(length);
+			self.selectRoom(name);
 			return true;
 		}, isVisible:function() {
 			return self.selectedRoom().name === name;
@@ -134,15 +152,11 @@ IRC.prototype.data = function(data) {
 	this.output("data", null, data);
 };
 
-IRC.prototype.whisper = function(nick, message) {
-	if(this.hasRoom(nick) === false) {
-		this.joinRoom(nick);
+IRC.prototype.output = function(roomname, nick, msg, highlight) {
+	if(this.hasRoom(roomname) === false) {
+		return;
 	}
 
-	this.output(nick, nick, message);
-};
-
-IRC.prototype.output = function(roomname, nick, msg, highlight) {
 	var room = this.getRoom(roomname);
 
 	var message = new Message(nick, msg, highlight || false);
@@ -152,6 +166,14 @@ IRC.prototype.output = function(roomname, nick, msg, highlight) {
 		this.tryScroll();
 	}
 };
+
+IRC.prototype.whisper = function(nick, message) {
+	if(this.hasRoom(nick) === false) {
+		this.joinRoom(nick);
+	}
+
+	this.output(nick, nick, message);
+}
 
 IRC.prototype.tryScroll = function() {
 	if(this.autoScroll === true) {
