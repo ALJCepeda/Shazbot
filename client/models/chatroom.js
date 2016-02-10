@@ -4,9 +4,11 @@ var Chatroom = function(name, options) {
 
 	this.name = name;
 	this.users = ko.observableArray([]);
+	this.selectedUser = ko.observable("");
 	this.messages = ko.observableArray([]);
 	this.unread = ko.observable(0);
 	this.showUsers = ko.observable(false);
+	this.showClose = ko.observable(true);
 
 	if(options.shouldSelect) {
 		this.shouldSelect = options.shouldSelect.bind(this);
@@ -20,6 +22,10 @@ var Chatroom = function(name, options) {
 			}
 		});
 	}
+
+	this.whisper = function(nick) {
+		console.log("Should whisper " + nick);
+	};
 };
 
 Chatroom.prototype.addUser = function(nick, role) {

@@ -7,7 +7,9 @@ var IRC = function() {
 	this.selectedRoom = ko.observable({});
 	this.autoScroll = true;
 
-	this.joinRoom("data");
+	var room = this.joinRoom("data");
+	room.showClose(false);
+	
 	this.selectRoom(0);
 
 	this.selectedRoom.subscribe(function(value) {
@@ -32,6 +34,10 @@ var IRC = function() {
 	}, 500);
 	container.onscroll = function() {
 		set_autoScroll();
+	};
+
+	this.doLeaveRoom = function(room) {
+		self.shouldLeaveRoom(room.name);
 	};
 };
 
@@ -95,19 +101,13 @@ IRC.prototype.getRoom = function(name) {
 	Removes Chatroom object with name
 	return true if successful
 */
-IRC.prototype.leaveRoom = function(name) {
-	var room = this.getRoom(name);
-
+IRC.prototype.leaveRoom = function(name){
 	if(this.hasRoom(name) === true) {
-		var index = this.roomsIndex[name];
+		var room = this.getRoom(name);
 
-		this.rooms.remove(index);
-		delete this.roomsIndex[name];
-
-		return true;
+		this.rooms.remove(room);
+		delete this.roomsIndex[room.name];
 	}
-
-	return false;
 };
 
 /*

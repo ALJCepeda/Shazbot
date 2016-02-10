@@ -234,7 +234,19 @@ Bot.prototype.identify = function(password) {
 };
 
 Bot.prototype.join = function(channel) {
+	if(channel.indexOf("#") === 0) {
+		channel = channel.substring(1);
+	}
+	
 	this.irc.raw("JOIN #{0}".supplant([channel]));
+};
+
+Bot.prototype.leave = function(channel) {
+	if(channel.indexOf("#") === 0) {
+		channel = channel.substring(1);
+	}
+
+	this.irc.raw("PART #{0}".supplant([channel]));
 };
 
 module.exports = Bot;

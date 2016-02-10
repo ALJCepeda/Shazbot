@@ -11,6 +11,10 @@ bootstrap_socketcmds = function(socket, bot, slasher) {
 			}
 		}
 	});
+
+	socket.on("shouldLeaveRoom", function(name) {
+		bot.leave(name);
+	})
 };
 
 module.exports = bootstrap_socketcmds;
