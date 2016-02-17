@@ -60,14 +60,14 @@
       		background:beige;
       	}
       	.selected {
-      		background:grey;
+      		background:lightgray;
       	}
 	</style>
 </head>
 
 <body>
 	<div class="col-nw sidebar" data-bind="foreach:rooms">
-		<button data-bind="click: shouldSelect">
+		<button data-bind="click: shouldSelect, css: { selected:$root.selectedRoom() === $data }">
 			<span class="glyphicon glyphicon-remove pull-left" aria-hidden="true?" data-bind="visible:showClose, click:$root.doLeaveRoom, clickBubble:false"></span>
 
 			<span data-bind="text: name"></span>
