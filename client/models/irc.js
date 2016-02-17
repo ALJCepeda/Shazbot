@@ -53,6 +53,7 @@ var IRC = function() {
 		}
 
 		irc.selectedRoom(room);
+		irc.didSelectRoom(nick, room);
 	};
 };
 
@@ -74,8 +75,11 @@ IRC.prototype.selectRoom = function(name) {
 		room.showUsers(!room.showUsers());
 	} else {
 		this.selectedRoom(room);
+		this.didSelectRoom(name, room);
 	}
 };
+
+IRC.prototype.didSelectRoom = function(name, room) {};
 
 /*
 	Creates and adds empty Chatroom object with name

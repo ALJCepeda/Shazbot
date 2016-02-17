@@ -75,7 +75,7 @@
 			<span class="pull-right" data-bind="text: unread, visible: unread() > 0" style="color:red;" ></span>
 		</button>
 
-		<div class="userList" data-bind="if:isVisible() && showUsers()">
+		<div class="userList" data-bind="visible:isVisible() && showUsers()">
 			<ul data-bind="foreach:users">
 				<li class="row-nw m-between">
 					<div style="overflow-x:auto;">
@@ -149,6 +149,10 @@ irc.shouldLeaveRoom = function(name) {
 
 irc.shouldJoinRoom = function(channel) {
 	socket.emit("shouldJoinRoom", channel);
+};
+
+irc.didSelectRoom = function(name, room) {
+	inputBox.focus();
 };
 
 function submitMessage() {
