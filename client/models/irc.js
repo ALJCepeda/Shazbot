@@ -44,11 +44,15 @@ var IRC = function() {
 	};
 
 	this.doWhisper = function(nick) {
-		if(self.hasRoom(nick) === false) {
-			var nick = self.strip(nick);
-			var room = self.joinRoom(nick);
+		var nick = self.strip(nick);
+		var room = self.getRoom(nick);
+
+		if(room === null) {
+			room = self.joinRoom(nick);
 			room.isWhisper = true;
 		}
+
+		irc.selectedRoom(room);
 	};
 };
 
@@ -110,7 +114,7 @@ IRC.prototype.hasRoom = function(name) {
 	returns Chatroom object with name
 */
 IRC.prototype.getRoom = function(name) {
-	var room;
+	var room = null;
 
 	if(this.hasRoom(name) === true) {
 		var index = this.roomsIndex[name];

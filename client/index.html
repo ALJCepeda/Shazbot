@@ -72,14 +72,18 @@
 
 			<span data-bind="text: name"></span>
 
-			<span class="pull-right" data-bind="text: unread, visible: unread() > 0" style="color:red" ></span>
+			<span class="pull-right" data-bind="text: unread, visible: unread() > 0" style="color:red;" ></span>
 		</button>
 
-		<div class="userList" data-bind="visible:isVisible() && showUsers()">
+		<div class="userList" data-bind="if:isVisible() && showUsers()">
 			<ul data-bind="foreach:users">
-				<li>
-					<span data-bind="text: $data"></span>
-					<span class="glyphicon glyphicon-comment pull-right" aria-hidden="true" data-bind="click:$root.doWhisper, clickBubble:false"></span>
+				<li class="row-nw m-between">
+					<div style="overflow-x:auto;">
+						<span style="white-space:nowra;p" data-bind="text: $data"></span>
+					</div>
+					<div style="margin-left:10px;">
+						<span class="glyphicon glyphicon-comment pull-right" aria-hidden="true" data-bind="click:$root.doWhisper, clickBubble:false"></span>
+					</div>
 				</li>
 			</ul>
 		</div>
@@ -102,20 +106,6 @@
 </body>
 
 <script>
-function throttle (callback, limit) {
-    var wait = false;                  // Initially, we're not waiting
-    return function () {               // We return a throttled function
-        if (!wait) {                   // If we're not waiting
-            callback.call();           // Execute users function
-            wait = true;               // Prevent future invocations
-
-            setTimeout(function () {   // After a period of time
-                wait = false;          // And allow future invocations
-            }, limit);
-        }
-    }
-}
-
 var socket = io();
 var irc = new IRC();
 var inputBox = document.getElementById("inputBox");
@@ -160,8 +150,6 @@ irc.shouldLeaveRoom = function(name) {
 irc.shouldJoinRoom = function(channel) {
 	socket.emit("shouldJoinRoom", channel);
 };
-
-irc.userJoined("data", "TestUser");
 
 function submitMessage() {
 	var message = inputBox.value;
