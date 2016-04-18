@@ -40,12 +40,13 @@ bootstrap_botcmds = function(bot, socket) {
 	});
 
 	bot.on("nicknames", function(entity, args) {
-		var ent = args[0].split(" = ");
-		var user = ent[0];
-		var room = ent[1];
+		var ent = args[0].match(/(.+) (=|\*) (.+)/);
+		var user = ent[1];
+		var room = ent[3];
 		var nicks = args[1].split(" ");
 
-		var data = { room:ent[1], nicknames:nicks };
+		var data = { room:room, nicknames:nicks };
+		
 		socket.emit("nicknames", data) ;
 	});
 
